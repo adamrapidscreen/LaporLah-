@@ -1,0 +1,9 @@
+export const POINTS = {
+    REPORT_CREATED: 10,
+    COMMENT_POSTED: 5,
+    REPORT_FOLLOWED: 3,
+    CONFIRMATION_VOTE: 8,
+    REPORT_CLOSED: 25,
+    RESOLUTION_CONFIRMED: 15,
+  } as const;
+  
