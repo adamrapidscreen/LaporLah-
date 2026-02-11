@@ -51,3 +51,44 @@ Do not ask clarifying questions — all context is in the docs
 Each story must reference specific file paths from architecture.md
 
 Include relevant code snippets for complex implementations
+
+# E3-S1: Report Creation Form
+
+## Description
+Build the create report form as a Client Component with title,
+description, and category fields.
+
+## Files to Create
+- src/components/reports/report-form.tsx
+
+## Implementation Notes
+
+Component pattern (from coding-standards.md):
+- 'use client' directive
+- Named export: ReportForm
+- Props interface: ReportFormProps
+- Validate with Zod on submit
+
+Category options (from constants):
+- infrastructure / Infrastruktur
+- cleanliness / Kebersihan
+- safety / Keselamatan
+- facilities / Kemudahan
+- other / Lain-lain
+
+Form fields:
+- title: Input, required, max 100 chars
+- description: Textarea, required, max 2000 chars
+- category: Select from CATEGORIES constant
+
+Design (from design-system.md):
+- Full width form, 16px side padding
+- Input: bg-input, border-border, rounded-[var(--radius)]
+- Submit button: "Hantar Laporan", full width, bg-primary
+
+## Acceptance Criteria
+- [ ] Form renders with all 3 fields
+- [ ] Category shows bilingual labels
+- [ ] Client-side validation shows errors
+- [ ] Submits via createReport server action
+- [ ] Redirects to report detail on success

@@ -1,19 +1,19 @@
 installation:
   version: 6.0.0-Beta.8
   installDate: 2026-02-10T13:34:01.046Z
-  lastUpdated: 2026-02-10T13:34:01.046Z
+  lastUpdated: 2026-02-10T14:07:14.357Z
 modules:
   - name: core
     version: 6.0.0-Beta.8
     installDate: 2026-02-10T13:34:01.046Z
-    lastUpdated: 2026-02-10T13:34:01.046Z
+    lastUpdated: 2026-02-10T14:07:14.357Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: bmm
     version: 6.0.0-Beta.8
     installDate: 2026-02-10T13:34:01.020Z
-    lastUpdated: 2026-02-10T13:34:01.046Z
+    lastUpdated: 2026-02-10T14:07:14.357Z
     source: built-in
     npmPackage: null
     repoUrl: null
@@ -21,3 +21,4 @@ ides:
   - claude-code
   - cursor
   - gemini
+  - roo
