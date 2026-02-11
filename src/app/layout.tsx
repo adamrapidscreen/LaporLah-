@@ -2,7 +2,10 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 
 import { ThemeProvider } from 'next-themes';
 
+import { NavWrapper } from '@/components/layout/nav-wrapper';
+
 import type { Metadata } from 'next';
+
 import './globals.css';
 
 const inter = Inter({
@@ -32,7 +35,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          {children}
+          <NavWrapper />
+          <main className="min-h-screen pb-20 md:pb-0">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
