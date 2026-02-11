@@ -7,6 +7,8 @@ import { z } from 'zod';
 
 import { STATUS_FLOW, statusConfig, type ReportStatus } from '@/lib/constants/statuses';
 import { createClient } from '@/lib/supabase/server';
+import { awardPoints, checkAndAwardBadges, updateStreak } from '@/lib/actions/gamification';
+import type { ActionState } from '@/lib/types';
 
 const createReportSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
@@ -17,10 +19,6 @@ const createReportSchema = z.object({
   longitude: z.coerce.number().optional().nullable(),
   area_name: z.string().optional().nullable(),
 });
-
-interface ActionState {
-  error: string | null;
-}
 
 export async function createReport(
   prevState: ActionState,
@@ -35,7 +33,8 @@ export async function createReport(
   }
 
   // Check banned - use any to bypass type issues with generated types
-  const { data: profile, error: profileError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profile, error: profileError } = await (supabase as any)
     .from('users')
     .select('is_banned')
     .eq('id', user.id)
@@ -80,6 +79,7 @@ export async function createReport(
     .single();
 
   if (insertError || !report) {
+    console.error('Insert error:', insertError);
     return { error: 'Failed to create report. Please try again.' };
   }
 
@@ -90,25 +90,14 @@ export async function createReport(
     report_id: report.id,
   });
 
-  // Award points (10 pts for creating a report)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).rpc('award_points', {
-    p_user_id: user.id,
-    p_action: 'create_report',
-    p_points: 10,
-    p_report_id: report.id,
-  });
-
-  // Update streak
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).rpc('update_streak', { p_user_id: user.id });
-
-  // Check for badge eligibility
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).rpc('check_and_award_badges', { p_user_id: user.id });
+  // Gamification actions
+  await awardPoints(user.id, 'create_report', report.id);
+  await updateStreak(user.id);
+  const { badges: newBadges } = await checkAndAwardBadges(user.id);
 
   revalidatePath('/');
-  redirect(`/report/${report.id}`);
+  // Redirect happens client-side after toast, so return reportId
+  return { newBadges, reportId: report.id };
 }
 
 const updateStatusSchema = z.object({

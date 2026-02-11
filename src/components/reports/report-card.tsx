@@ -6,7 +6,7 @@ import { MapPin, Users } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import type { Report } from '@/lib/types';
-import { timeAgo } from '@/lib/utils/date';
+import { formatRelativeTime } from '@/lib/utils';
 
 import { CategoryTag } from './category-tag';
 import { StatusPill } from './status-pill';
@@ -76,7 +76,7 @@ export function ReportCard({ report }: ReportCardProps) {
                 <Users className="h-3 w-3" />
                 {report.follower_count}
               </span>
-              <time>{timeAgo(report.created_at)}</time>
+              <time>{formatRelativeTime(report.created_at)}</time>
             </div>
           </div>
         </div>

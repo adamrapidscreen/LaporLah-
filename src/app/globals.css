@@ -162,3 +162,46 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Badge unlock animations */
+@keyframes confetti-burst {
+  0% {
+    background-image: radial-gradient(circle, var(--primary) 2px, transparent 2px);
+    background-size: 20px 20px;
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  100% {
+    background-size: 60px 60px;
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes bounce-once {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.animate-confetti {
+  animation: confetti-burst 800ms ease-out forwards;
+}
+
+.animate-bounce-once {
+  animation: bounce-once 600ms ease-out 200ms;
+}
+
+.duration-400 {
+  transition-duration: 400ms;
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}

@@ -32,7 +32,12 @@ export async function GET(request: Request) {
       if (!upsertError) {
         return NextResponse.redirect(`${origin}${next}`);
       }
+      console.error('[auth/callback] users upsert failed:', upsertError);
+    } else if (error) {
+      console.error('[auth/callback] exchangeCodeForSession failed:', error.message);
     }
+  } else {
+    console.error('[auth/callback] missing code in callback URL');
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth`);

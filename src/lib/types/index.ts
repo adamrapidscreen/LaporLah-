@@ -1,5 +1,11 @@
+import type { BadgeType, BadgeTier } from '@/lib/constants/badges';
 import type { CategoryValue } from '@/lib/constants/categories';
 import type { ReportStatus } from '@/lib/constants/statuses';
+
+interface NewBadge {
+  new_badge_type: BadgeType;
+  new_tier: BadgeTier;
+}
 
 export interface Report {
   id: string;
@@ -27,5 +33,7 @@ export interface Report {
 }
 
 export interface ActionState {
-  error: string | null;
+  error?: string | null;
+  newBadges?: NewBadge[];
+  reportId?: string;
 }

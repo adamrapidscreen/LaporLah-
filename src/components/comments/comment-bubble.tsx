@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatTimeAgo } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
 
 export interface Comment {
   id: string;
@@ -29,7 +29,7 @@ export function CommentBubble({ comment }: CommentBubbleProps) {
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-medium">{comment.user.full_name}</span>
           <span className="text-xs text-muted-foreground">
-            {formatTimeAgo(comment.created_at)}
+            {formatRelativeTime(comment.created_at)}
           </span>
         </div>
         <p className="mt-1 text-sm text-foreground">{comment.content}</p>

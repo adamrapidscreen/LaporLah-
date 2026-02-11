@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 import { Home, Bell, User, Plus } from 'lucide-react';
 
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { cn } from '@/lib/utils';
 
 interface NavItemProps {
@@ -29,7 +30,12 @@ function NavItem({ href, icon: Icon, label, isActive }: NavItemProps) {
   );
 }
 
-export function BottomNav() {
+interface BottomNavProps {
+  userId?: string;
+  initialUnreadCount?: number;
+}
+
+export function BottomNav({ userId, initialUnreadCount = 0 }: BottomNavProps) {
   const pathname = usePathname();
 
   return (
@@ -45,7 +51,11 @@ export function BottomNav() {
           <Plus className="h-6 w-6" />
         </Link>
 
-        <NavItem href="/notifications" icon={Bell} label="Alerts" isActive={pathname === '/notifications'} />
+        {userId ? (
+          <NotificationBell userId={userId} initialUnreadCount={initialUnreadCount} />
+        ) : (
+          <NavItem href="/notifications" icon={Bell} label="Alerts" isActive={pathname === '/notifications'} />
+        )}
         <NavItem href="/profile" icon={User} label="Profile" isActive={pathname === '/profile'} />
       </div>
     </nav>

@@ -1,6 +1,8 @@
 // Auto-generated Supabase database types
 // Generate with: supabase gen types typescript --project-id <project-id> > src/lib/types/database.ts
 
+import type { BadgeType, BadgeTier } from '@/lib/constants/badges';
+
 export type Database = {
   public: {
     Tables: {
@@ -297,7 +299,36 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      award_points: {
+        Args: {
+          p_user_id: string;
+          p_action: string;
+          p_points: number;
+          p_report_id?: string | null;
+        };
+        Returns: void;
+      };
+      check_and_award_badges: {
+        Args: {
+          p_user_id: string;
+        };
+        Returns: { new_badge_type: BadgeType, new_tier: BadgeTier }[];
+      };
+      update_streak: {
+        Args: {
+          p_user_id: string;
+        };
+        Returns: void;
+      };
+      notify_followers: {
+        Args: {
+          p_report_id: string;
+          p_type: string; // notification_type enum in DB
+          p_message: string;
+          p_exclude_user?: string | null;
+        };
+        Returns: void;
+      };
     };
     Enums: {
       badge_tier: 'bronze' | 'silver' | 'gold';

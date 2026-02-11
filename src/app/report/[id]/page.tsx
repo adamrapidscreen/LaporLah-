@@ -3,10 +3,12 @@ import { notFound } from 'next/navigation';
 
 import { CommentForm } from '@/components/comments/comment-form';
 import { CommentList } from '@/components/comments/comment-list';
+import { VotePanel } from '@/components/confirmation/vote-panel';
 import { LocationDisplayWrapper } from '@/components/map/location-display-wrapper';
 import { CategoryTag } from '@/components/reports/category-tag';
 import { StatusStepper } from '@/components/reports/status-stepper';
 import { StatusUpdate } from '@/components/reports/status-update';
+import { FollowButton } from '@/components/shared/follow-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { CATEGORIES } from '@/lib/constants/categories';
@@ -45,6 +47,67 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   const { data: { user } } = await supabase.auth.getUser();
   const isAuthenticated = !!user;
   const isCreatorOrAdmin = user?.id === typedReport.user_id; // TODO: add admin check
+
+  // Fetch follow state for current user
+  let isFollowed = false;
+  let followCount = 0;
+
+  if (user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: follow } = await (supabase as any)
+      .from('follows')
+      .select('id')
+      .eq('report_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    isFollowed = !!follow;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count } = await (supabase as any)
+    .from('follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('report_id', id);
+
+  followCount = count ?? 0;
+
+  // Fetch confirmations for vote panel
+  let confirmedCount = 0;
+  let notYetCount = 0;
+  let userVote: 'confirmed' | 'not_yet' | null = null;
+
+  if (typedReport.status === 'resolved') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: confirmations } = await (supabase as any)
+      .from('confirmations')
+      .select('vote, user_id')
+      .eq('report_id', id);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    confirmedCount = confirmations?.filter((c: any) => c.vote === 'confirmed').length ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    notYetCount = confirmations?.filter((c: any) => c.vote === 'not_yet').length ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    userVote = confirmations?.find((c: any) => c.user_id === user?.id)?.vote ?? null;
+
+    // Check timeout on page load
+    if (typedReport.resolved_at) {
+      const hoursElapsed = (Date.now() - new Date(typedReport.resolved_at).getTime()) / (1000 * 60 * 60);
+      if (hoursElapsed >= 72) {
+        const { checkResolution } = await import('@/lib/actions/votes');
+        await checkResolution(typedReport.id);
+        // Re-fetch report after potential state change
+        const { data: updatedReport } = await supabase
+          .from('reports')
+          .select('*')
+          .eq('id', id)
+          .single();
+        if (updatedReport) {
+          Object.assign(typedReport, updatedReport);
+        }
+      }
+    }
+  }
 
   const categoryInfo = CATEGORIES.find((c) => c.value === typedReport.category);
 
@@ -85,6 +148,16 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               isAuthenticated={isAuthenticated}
             />
           </div>
+
+          {/* Vote Panel - only for resolved reports */}
+          {typedReport.status === 'resolved' && typedReport.resolved_at && (
+            <VotePanel
+              reportId={typedReport.id}
+              resolvedAt={typedReport.resolved_at}
+              initialVotes={{ confirmed: confirmedCount, notYet: notYetCount }}
+              userVote={userVote}
+            />
+          )}
 
           {/* Title and Category */}
           <div className="space-y-2">
@@ -128,13 +201,11 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               </div>
             </div>
 
-            {/* Follow Button Placeholder */}
-            <button
-              type="button"
-              className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
-            >
-              Follow
-            </button>
+            <FollowButton
+              reportId={typedReport.id}
+              initialFollowed={isFollowed}
+              initialCount={followCount}
+            />
           </div>
         </div>
       </Card>
