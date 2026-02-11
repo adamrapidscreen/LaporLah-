@@ -1,0 +1,117 @@
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
+
+import L from 'leaflet';
+import { MapPin, Crosshair } from 'lucide-react';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+
+import { Button } from '@/components/ui/button';
+import { useGeolocation } from '@/lib/hooks/use-geolocation';
+import { reverseGeocode } from '@/lib/utils/geocoding';
+
+import 'leaflet/dist/leaflet.css';
+
+interface LocationPickerProps {
+  onLocationSelect: (location: {
+    latitude: number;
+    longitude: number;
+    area_name: string;
+  }) => void;
+}
+
+// Default: Kuala Lumpur
+const DEFAULT_CENTER: [number, number] = [3.139, 101.6869];
+const DEFAULT_ZOOM = 15;
+
+// Fix Leaflet default icon issue with bundlers
+const markerIcon = new L.Icon({
+  iconUrl: '/icons/marker-icon.png',
+  iconRetinaUrl: '/icons/marker-icon-2x.png',
+  shadowUrl: '/icons/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+function DraggableMarker({
+  position,
+  onMove,
+}: {
+  position: [number, number];
+  onMove: (lat: number, lng: number) => void;
+}) {
+  const eventHandlers = {
+    dragend(e: L.DragEndEvent) {
+      const marker = e.target;
+      const pos = marker.getLatLng();
+      onMove(pos.lat, pos.lng);
+    },
+  };
+
+  return <Marker position={position} draggable icon={markerIcon} eventHandlers={eventHandlers} />;
+}
+
+export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
+  const { latitude, longitude, loading, error, requestLocation } = useGeolocation();
+  const [position, setPosition] = useState<[number, number]>(DEFAULT_CENTER);
+  const [areaName, setAreaName] = useState<string>('');
+
+  const handleGeocode = useCallback(async (lat: number, lng: number) => {
+    const name = await reverseGeocode(lat, lng);
+    setAreaName(name);
+    onLocationSelect({ latitude: lat, longitude: lng, area_name: name });
+  }, [onLocationSelect]);
+
+  useEffect(() => {
+    if (latitude && longitude) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      handleGeocode(latitude, longitude);
+    }
+  }, [latitude, longitude, handleGeocode]);
+
+  const handleMarkerMove = (lat: number, lng: number) => {
+    setPosition([lat, lng]);
+    handleGeocode(lat, lng);
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Location</label>
+      <div className="relative rounded-lg overflow-hidden border border-border">
+        <MapContainer
+          center={position}
+          zoom={DEFAULT_ZOOM}
+          className="h-48 w-full z-0"
+          scrollWheelZoom={false}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <DraggableMarker position={position} onMove={handleMarkerMove} />
+        </MapContainer>
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          className="absolute bottom-2 right-2 z-10 h-8 w-8"
+          onClick={requestLocation}
+          disabled={loading}
+        >
+          <Crosshair className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {areaName && (
+        <p className="flex items-center gap-1 text-sm text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5" />
+          {areaName}
+        </p>
+      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+}
