@@ -6,7 +6,7 @@ export default async function FlaggedItemsPage() {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
         <span className="text-6xl mb-4">🏳️</span>
         <h3 className="text-lg font-semibold">No flagged items</h3>
         <p className="text-sm text-muted-foreground">All clear! No reports or comments have been flagged.</p>
@@ -15,7 +15,7 @@ export default async function FlaggedItemsPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4 pb-24">
       <h2 className="text-lg font-semibold">Flagged Items ({items.length})</h2>
       <div className="space-y-3">
         {items.map((item) => (

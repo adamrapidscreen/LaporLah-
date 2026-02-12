@@ -1,10 +1,12 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 
 import { ThemeProvider } from 'next-themes';
+import NextTopLoader from 'nextjs-toploader';
 
 import { NavWrapper } from '@/components/layout/nav-wrapper';
+import { Toaster } from '@/components/ui/sonner';
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 import './globals.css';
 
@@ -26,6 +28,12 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,11 +42,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+        <NextTopLoader 
+          color="hsl(var(--primary))"
+          showSpinner={false}
+          height={3}
+        />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <NavWrapper />
-          <main className="min-h-screen pb-20 md:pb-0">
+          <main className="min-h-screen overflow-x-hidden pb-20 md:pb-0">
             {children}
           </main>
+          <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>
     </html>

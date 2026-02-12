@@ -55,3 +55,12 @@ const serwist = new Serwist({
 } as any);
 
 serwist.addEventListeners();
+
+// Handle SKIP_WAITING message
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(self as any).addEventListener('message', (event: any) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (self as any).skipWaiting();
+  }
+});

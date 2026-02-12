@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from 'react';
 
 import { Send } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,8 +43,12 @@ export function CommentForm({ reportId, commentsLocked }: CommentFormProps) {
       const result = await addComment(reportId, content.trim());
       if (result?.error) {
         setError(result.error);
+        toast.error('Sesuatu telah berlaku', {
+          description: result.error,
+        });
       } else {
         formRef.current?.reset();
+        toast.success('Komen berjaya dihantar');
       }
     });
   }
@@ -56,12 +61,12 @@ export function CommentForm({ reportId, commentsLocked }: CommentFormProps) {
           id="comment-content"
           name="content"
           placeholder="Tulis komen... / Write a comment..."
-          className="min-h-[40px] resize-none"
+          className="min-h-[44px] resize-none"
           rows={1}
           maxLength={1000}
           disabled={isPending}
         />
-        <Button type="submit" size="icon" disabled={isPending} className="shrink-0">
+        <Button type="submit" size="icon" disabled={isPending} className="shrink-0 min-h-[44px] min-w-[44px]">
           <Send className="h-4 w-4" />
         </Button>
       </div>

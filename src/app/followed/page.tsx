@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { ReportCard } from '@/components/reports/report-card';
+import { EmptyState } from '@/components/shared/empty-state';
 import { createClient } from '@/lib/supabase/server';
 import type { Report } from '@/lib/types';
 
@@ -10,7 +11,7 @@ export default async function FollowedReportsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // Fetch reports the user follows, ordered by newest follow first
+  // Fetch reports user follows, ordered by newest follow first
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: follows } = await (supabase as any)
     .from('follows')
@@ -23,24 +24,22 @@ export default async function FollowedReportsPage() {
     .filter(Boolean) ?? [];
 
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <div className="mx-auto max-w-2xl p-4 pb-24">
       <h1 className="mb-4 text-xl font-bold">
-        Laporan Diikuti / My Followed Reports
+        My Followed Reports
       </h1>
 
       {reports.length === 0 ? (
-        <div className="py-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            Anda belum mengikuti sebarang laporan.
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            You haven&apos;t followed any reports yet.
-          </p>
-        </div>
+        <EmptyState
+          emoji="👁"
+          title="No followed reports"
+          subtitle="Follow reports to track progress"
+          action={{ label: "Browse Reports", href: "/" }}
+        />
       ) : (
         <div className="space-y-4">
-          {reports.map((report: unknown) => (
-            <ReportCard key={(report as Report).id} report={report as Report} />
+          {reports.map((report: unknown, index: number) => (
+            <ReportCard key={(report as Report).id} report={report as Report} priority={index === 0} />
           ))}
         </div>
       )}

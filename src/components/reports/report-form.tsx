@@ -4,9 +4,9 @@ import { useActionState, useState, useEffect } from 'react';
 
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation'; // Import useRouter
+import { toast } from 'sonner';
 
-
-import { BadgeUnlock } from '@/components/gamification/badge-unlock'; // Import the component
+import { BadgeUnlock } from '@/components/gamification/badge-unlock'; // Import component
 import { PhotoUpload } from '@/components/reports/photo-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { createReport } from '@/lib/actions/reports';
 import { CATEGORIES } from '@/lib/constants/categories';
-import { useBadgeUnlock } from '@/lib/hooks/use-badge-unlock'; // Import the hook
+import { useBadgeUnlock } from '@/lib/hooks/use-badge-unlock'; // Import hook
 import type { ActionState } from '@/lib/types';
 
 const LocationPicker = dynamic(
@@ -50,8 +50,18 @@ export function ReportForm({}: ReportFormProps) {
   const [location, setLocation] = useState<SelectedLocation | null>(null);
 
   useEffect(() => {
+    if (state.error) {
+      toast.error('Sesuatu telah berlaku', {
+        description: state.error,
+      });
+    } else if (state.reportId && !state.error) {
+      toast.success('Laporan berjaya dihantar!');
+    }
+  }, [state.error, state.reportId]);
+
+  useEffect(() => {
     if (state.newBadges && state.newBadges.length > 0) {
-      // For simplicity, show only the first new badge. Can be extended to show all in sequence.
+      // For simplicity, show only first new badge. Can be extended to show all in sequence.
       const firstNewBadge = state.newBadges[0];
       showBadgeUnlock({
         badgeType: firstNewBadge.new_badge_type,

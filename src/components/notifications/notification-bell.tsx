@@ -2,11 +2,10 @@
 
 import { useState, useCallback } from 'react';
 
-import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { Bell } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { useRealtime } from '@/lib/hooks/use-realtime';
 import { cn } from '@/lib/utils';
 
@@ -16,8 +15,10 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ userId, initialUnreadCount }: NotificationBellProps) {
+  const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [shake, setShake] = useState(false);
+  const isActive = pathname === '/notifications';
 
   const handleInsert = useCallback(() => {
     setUnreadCount((prev) => prev + 1);
@@ -32,8 +33,13 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
   });
 
   return (
-    <Button variant="ghost" size="icon" asChild className="relative">
-      <Link href="/notifications">
+    <div
+      className={cn(
+        'relative flex flex-col items-center justify-center gap-0.5 text-xs transition-colors',
+        isActive ? 'text-primary' : 'text-muted-foreground'
+      )}
+    >
+      <span className="relative">
         <Bell
           className={cn(
             'h-5 w-5',
@@ -45,7 +51,8 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
-      </Link>
-    </Button>
+      </span>
+      <span>Notifications</span>
+    </div>
   );
 }

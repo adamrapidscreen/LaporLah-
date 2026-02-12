@@ -1,7 +1,9 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { STATUS_FLOW, statusConfig, getStatusIndex, type ReportStatus } from '@/lib/constants/statuses';
 import { cn } from '@/lib/utils';
+import { Fragment } from 'react';
 
 interface StatusStepperProps {
   currentStatus: ReportStatus;
@@ -10,45 +12,65 @@ interface StatusStepperProps {
 export function StatusStepper({ currentStatus }: StatusStepperProps) {
   const currentIndex = getStatusIndex(currentStatus);
 
-  return (
-    <div className="flex items-center gap-1">
-      {STATUS_FLOW.map((status, index) => {
-        const config = statusConfig[status];
-        const isCompleted = index < currentIndex;
-        const isCurrent = index === currentIndex;
-        const isUpcoming = index > currentIndex;
+  const isCompleted = (index: number) => index < currentIndex;
+  const isCurrent = (index: number) => index === currentIndex;
+  const isUpcoming = (index: number) => index > currentIndex;
 
-        return (
-          <div key={status} className="flex items-center">
+  const STEPS = STATUS_FLOW.map(status => ({
+    value: status,
+    label: statusConfig[status].labelEn,
+  }));
+
+  return (
+    <div className="w-full">
+      {/* Dots and connecting lines */}
+      <div className="flex items-center w-full">
+        {STEPS.map((step, index) => (
+          <Fragment key={step.value}>
             {/* Dot */}
-            <div className="flex flex-col items-center gap-1">
-              <div
-                className={cn(
-                  'h-3 w-3 rounded-full border-2 transition-all',
-                  isCompleted && 'border-primary bg-primary',
-                  isCurrent && 'border-primary bg-primary animate-pulse',
-                  isUpcoming && 'border-muted bg-transparent'
-                )}
-              />
-              <span className={cn(
-                'text-[10px] leading-tight text-center',
-                isCurrent ? config.text : 'text-muted-foreground'
+            <div className="flex flex-col items-center" style={{ width: '48px' }}>
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                isCompleted(index) && "bg-primary text-primary-foreground",
+                isCurrent(index) && "bg-primary text-primary-foreground ring-4 ring-primary/20",
+                isUpcoming(index) && "bg-muted border-2 border-border"
               )}>
-                {config.labelMs}
+                {isCompleted(index) && <Check className="w-4 h-4" />}
+                {isCurrent(index) && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
+              </div>
+            </div>
+
+            {/* Connecting line (not after last dot) */}
+            {index < STEPS.length - 1 && (
+              <div className={cn(
+                "flex-1 h-0.5",
+                isCompleted(index) ? "bg-primary" : "bg-border"
+              )} />
+            )}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Labels row — must align with dots above */}
+      <div className="flex items-start w-full mt-2">
+        {STEPS.map((step, index) => (
+          <Fragment key={step.value}>
+            <div className="flex justify-center" style={{ width: '48px' }}>
+              <span className={cn(
+                "text-[10px] text-center leading-tight",
+                isCurrent(index) ? "text-primary font-medium" : "text-muted-foreground"
+              )}>
+                {step.label}
               </span>
             </div>
-            {/* Connecting line */}
-            {index < STATUS_FLOW.length - 1 && (
-              <div
-                className={cn(
-                  'mx-1 h-0.5 w-6',
-                  index < currentIndex ? 'bg-primary' : 'border-t border-dashed border-muted'
-                )}
-              />
+
+            {/* Spacer matching the connecting line width */}
+            {index < STEPS.length - 1 && (
+              <div className="flex-1" />
             )}
-          </div>
-        );
-      })}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 }

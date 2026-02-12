@@ -17,13 +17,18 @@ import {
 import { CATEGORIES } from '@/lib/constants/categories';
 import { STATUS_FLOW, statusConfig } from '@/lib/constants/statuses';
 
-export function ReportFeed() {
+interface ReportFeedProps {
+  searchStatus?: string;
+  searchCategory?: string;
+}
+
+export function ReportFeed({ searchStatus, searchCategory }: ReportFeedProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const currentCategory = searchParams.get('category') ?? 'all';
-  const currentStatus = searchParams.get('status') ?? 'all';
+  const currentCategory = searchCategory ?? searchParams.get('category') ?? 'all';
+  const currentStatus = searchStatus ?? searchParams.get('status') ?? 'all';
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
@@ -45,12 +50,15 @@ export function ReportFeed() {
   const hasFilters = currentCategory !== 'all' || currentStatus !== 'all';
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2">
-      <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
+    <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div className="flex flex-col gap-2 px-4 py-3">
+        <h2 className="text-base font-semibold text-foreground">Laporan Terkini</h2>
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
 
       {/* Category Filter */}
       <Select value={currentCategory} onValueChange={(v) => updateFilter('category', v)}>
-        <SelectTrigger className="h-8 w-auto min-w-[120px] text-xs">
+        <SelectTrigger className="h-9 flex-1 text-xs">
           <SelectValue placeholder="Category" />
         </SelectTrigger>
         <SelectContent>
@@ -65,14 +73,14 @@ export function ReportFeed() {
 
       {/* Status Filter */}
       <Select value={currentStatus} onValueChange={(v) => updateFilter('status', v)}>
-        <SelectTrigger className="h-8 w-auto min-w-[100px] text-xs">
+        <SelectTrigger className="h-9 flex-1 text-xs">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Statuses</SelectItem>
           {STATUS_FLOW.map((status) => (
             <SelectItem key={status} value={status}>
-              {statusConfig[status].label}
+              {statusConfig[status].labelEn}
             </SelectItem>
           ))}
         </SelectContent>
@@ -84,11 +92,13 @@ export function ReportFeed() {
           variant="ghost"
           size="sm"
           onClick={clearFilters}
-          className="h-8 text-xs text-muted-foreground"
+          className="h-9 min-h-[44px] text-xs text-muted-foreground"
         >
           Clear
         </Button>
       )}
+        </div>
+      </div>
     </div>
   );
 }

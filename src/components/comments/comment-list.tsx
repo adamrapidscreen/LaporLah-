@@ -1,4 +1,5 @@
 import { CommentBubble, type Comment } from '@/components/comments/comment-bubble';
+import { EmptyState } from '@/components/shared/empty-state';
 import { createClient } from '@/lib/supabase/server';
 
 export interface CommentListProps {
@@ -15,9 +16,11 @@ export async function CommentList({ reportId }: CommentListProps) {
 
   if (!comments || comments.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        Tiada komen lagi / No comments yet
-      </p>
+      <EmptyState
+        emoji="💬"
+        title="No comments yet"
+        subtitle="Start the conversation"
+      />
     );
   }
 

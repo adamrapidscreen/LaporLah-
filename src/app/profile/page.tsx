@@ -8,8 +8,8 @@ import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/types/database';
 
 export const metadata = {
-  title: 'Profil Saya',
-  description: 'Lihat profil anda, lencana dan aktiviti.',
+  title: 'My Profile',
+  description: 'View your profile, badges and activity.',
 };
 
 export default async function ProfilePage() {
@@ -92,7 +92,7 @@ export default async function ProfilePage() {
     .limit(10);
 
   return (
-    <div className="space-y-6 p-4 max-w-lg mx-auto">
+    <div className="space-y-6 p-4 max-w-lg mx-auto pb-24">
       <CivicCard
         user={{
           full_name: typedUser.full_name,
@@ -110,7 +110,7 @@ export default async function ProfilePage() {
 
       {/* Badges Section */}
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Lencana</h2>
+        <h2 className="text-lg font-semibold">Badges</h2>
         <div className="grid gap-3">
           {(Object.keys(BADGE_DEFINITIONS) as BadgeType[]).map((badgeType) => {
             // Find earned badges for this type and get highest tier
@@ -134,7 +134,7 @@ export default async function ProfilePage() {
 
       {/* Activity Feed */}
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Aktiviti Terkini</h2>
+        <h2 className="text-lg font-semibold">Recent Activity</h2>
         <ActivityFeed activities={activities ?? []} />
       </section>
     </div>

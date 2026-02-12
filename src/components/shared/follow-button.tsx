@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition } from 'react';
 
 import { Heart } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { toggleFollow } from '@/lib/actions/follows';
@@ -30,8 +31,16 @@ export function FollowButton({
 
   function handleToggle() {
     startTransition(async () => {
-      setOptimistic(!optimistic.followed);
-      await toggleFollow(reportId);
+      const newFollowed = !optimistic.followed;
+      setOptimistic(newFollowed);
+      const result = await toggleFollow(reportId);
+      if (result?.error) {
+        toast.error('Sesuatu telah berlaku', {
+          description: result.error,
+        });
+      } else {
+        toast.success(newFollowed ? 'Anda kini mengikuti laporan ini' : 'Berhenti mengikuti');
+      }
     });
   }
 
@@ -41,7 +50,7 @@ export function FollowButton({
       size="sm"
       onClick={handleToggle}
       disabled={isPending}
-      className="gap-1.5"
+      className="gap-1.5 min-h-[44px] min-w-[44px]"
     >
       <Heart
         className={cn(

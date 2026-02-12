@@ -3,6 +3,8 @@
 import { useTransition, useState } from 'react';
 
 import { Countdown } from '@/components/confirmation/countdown';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { castVote } from '@/lib/actions/votes';
 
@@ -38,6 +40,11 @@ export function VotePanel({
         // Revert optimistic update
         setCurrentVote(userVote);
         setVotes(initialVotes);
+        toast.error('Sesuatu telah berlaku', {
+          description: result.error,
+        });
+      } else {
+        toast.success('Undian anda telah direkodkan');
       }
     });
   };
@@ -56,7 +63,7 @@ export function VotePanel({
           onClick={() => handleVote('confirmed')}
           disabled={hasVoted || isPending}
           variant={currentVote === 'confirmed' ? 'default' : 'outline'}
-          className="flex-1"
+          className="flex-1 min-h-[44px]"
         >
           ✅ Sahkan ({votes.confirmed})
         </Button>
@@ -64,7 +71,7 @@ export function VotePanel({
           onClick={() => handleVote('not_yet')}
           disabled={hasVoted || isPending}
           variant={currentVote === 'not_yet' ? 'destructive' : 'outline'}
-          className="flex-1"
+          className="flex-1 min-h-[44px]"
         >
           ❌ Belum ({votes.notYet})
         </Button>

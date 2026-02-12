@@ -79,11 +79,11 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Location</label>
-      <div className="relative rounded-lg overflow-hidden border border-border">
+      <div className="relative rounded-xl overflow-hidden h-[180px] z-0 border border-border">
         <MapContainer
           center={position}
           zoom={DEFAULT_ZOOM}
-          className="h-48 w-full z-0"
+          className="h-full w-full"
           scrollWheelZoom={false}
         >
           <TileLayer
@@ -97,7 +97,7 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
           type="button"
           variant="secondary"
           size="icon"
-          className="absolute bottom-2 right-2 z-10 h-8 w-8"
+          className="absolute bottom-2 right-2 z-10 min-h-[44px] min-w-[44px]"
           onClick={requestLocation}
           disabled={loading}
         >

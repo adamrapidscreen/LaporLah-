@@ -1,22 +1,26 @@
-import { FileSearch } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {
-  icon?: React.ElementType;
+  emoji: string;
   title: string;
-  description?: string;
+  subtitle: string;
+  action?: {
+    label: string;
+    href: string;
+  };
 }
 
-export function EmptyState({
-  icon: Icon = FileSearch,
-  title,
-  description,
-}: EmptyStateProps) {
+export function EmptyState({ emoji, title, subtitle, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <Icon className="h-12 w-12 text-muted-foreground/50" />
-      <h3 className="text-lg font-semibold">{title}</h3>
-      {description && (
-        <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <span className="text-[64px] leading-none mb-4" role="img">{emoji}</span>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
+      <p className="text-sm text-muted-foreground mb-4">{subtitle}</p>
+      {action && (
+        <Button asChild>
+          <Link href={action.href}>{action.label}</Link>
+        </Button>
       )}
     </div>
   );

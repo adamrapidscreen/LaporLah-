@@ -25,14 +25,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         </div>
         <nav className="container mx-auto px-4">
-          <div className="flex gap-4 border-b">
-            <Link href="/admin/flagged" className="px-3 py-2 text-sm font-medium hover:text-primary border-b-2 border-transparent hover:border-primary transition-colors">
+          <div className="flex gap-2 overflow-x-auto border-b scrollbar-hide">
+            <Link href="/admin/flagged" className="px-4 py-3 text-sm font-medium hover:text-primary border-b-2 border-transparent hover:border-primary transition-colors whitespace-nowrap min-h-[44px] flex items-center">
               Flagged
             </Link>
-            <Link href="/admin" className="px-3 py-2 text-sm font-medium hover:text-primary border-b-2 border-transparent hover:border-primary transition-colors">
+            <Link href="/admin" className="px-4 py-3 text-sm font-medium hover:text-primary border-b-2 border-transparent hover:border-primary transition-colors whitespace-nowrap min-h-[44px] flex items-center">
               Reports
             </Link>
-            <Link href="/admin/users" className="px-3 py-2 text-sm font-medium hover:text-primary border-b-2 border-transparent hover:border-primary transition-colors">
+            <Link href="/admin/users" className="px-4 py-3 text-sm font-medium hover:text-primary border-b-2 border-transparent hover:border-primary transition-colors whitespace-nowrap min-h-[44px] flex items-center">
               Users
             </Link>
           </div>

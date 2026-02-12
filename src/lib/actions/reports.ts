@@ -194,3 +194,19 @@ export async function updateReportStatus(reportId: string, newStatus: ReportStat
   revalidatePath(`/report/${reportId}`);
   return { success: true };
 }
+
+export async function getCommunityStats() {
+  const supabase = await createClient();
+
+  const { count: open } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("is_hidden", false);
+  const { count: in_progress } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "in_progress").eq("is_hidden", false);
+  const { count: closed } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "closed").eq("is_hidden", false);
+  const { count: resolved } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "resolved").eq("is_hidden", false);
+
+  return {
+    open: open || 0,
+    in_progress: in_progress || 0,
+    closed: closed || 0,
+    resolved: resolved || 0,
+  };
+}

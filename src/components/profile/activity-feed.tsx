@@ -1,4 +1,4 @@
-import { cn, formatProfileRelativeTime } from '@/lib/utils'; // Import the new utility
+import { cn, formatRelativeTime } from '@/lib/utils'; // Import the utility
 
 const ACTION_LABELS: Record<string, { emoji: string; label: string }> = {
   create_report: { emoji: '📝', label: 'Mencipta laporan' },
@@ -33,7 +33,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     <div className="space-y-3">
       {activities.map((activity) => {
         const config = ACTION_LABELS[activity.action] ?? { emoji: '•', label: activity.action };
-        const timeAgo = formatProfileRelativeTime(activity.created_at); // Use the new function
+        const timeAgo = formatRelativeTime(activity.created_at); // Use the function
 
         return (
           <div key={activity.id} className="flex items-center gap-3 text-sm">

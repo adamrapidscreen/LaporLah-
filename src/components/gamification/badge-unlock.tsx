@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { toast } from 'sonner';
+
 import { BADGE_DEFINITIONS, TIER_COLORS, type BadgeType, type BadgeTier } from '@/lib/constants/badges';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +23,9 @@ export function BadgeUnlock({ badgeType, tier, onDismiss }: BadgeUnlockProps) {
     // Trigger entrance animation
     requestAnimationFrame(() => setIsVisible(true));
 
+    // Show toast notification
+    toast.success(`🏆 Tahniah! Anda dapat lencana: ${badge.name}`);
+
     // Auto-dismiss after 5 seconds
     const timeout = setTimeout(() => {
       setIsVisible(false);
@@ -28,7 +33,7 @@ export function BadgeUnlock({ badgeType, tier, onDismiss }: BadgeUnlockProps) {
     }, 5000);
 
     return () => clearTimeout(timeout);
-  }, [onDismiss]);
+  }, [onDismiss, badge.name]);
 
   return (
     <div

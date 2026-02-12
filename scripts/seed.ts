@@ -421,8 +421,8 @@ async function main() {
     { user_id: USER_IDS.SITI, action: 'comment_posted', points: 5, created_at: new Date(now - 20 * 24 * 60 * 60 * 1000).toISOString() },
     
     // Confirmations: 5 × 10 = 50
-    { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: confirmations[3].created_at },
-    { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: confirmations[7].created_at },
+    { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: new Date(now - 21 * 24 * 60 * 60 * 1000).toISOString() },
+    { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: new Date(now - 24 * 24 * 60 * 60 * 1000).toISOString() },
     { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: new Date(now - 22 * 24 * 60 * 60 * 1000).toISOString() },
     { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: new Date(now - 25 * 24 * 60 * 60 * 1000).toISOString() },
     { user_id: USER_IDS.SITI, action: 'confirmation_vote', points: 10, created_at: new Date(now - 28 * 24 * 60 * 60 * 1000).toISOString() },
@@ -480,8 +480,8 @@ async function main() {
     { user_id: USER_IDS.AHMAD, action: 'comment_posted', points: 5, created_at: new Date(now - 15 * 24 * 60 * 60 * 1000).toISOString() },
     
     // Confirmations: 3 × 10 = 30
-    { user_id: USER_IDS.AHMAD, action: 'confirmation_vote', points: 10, created_at: confirmations[0].created_at },
-    { user_id: USER_IDS.AHMAD, action: 'confirmation_vote', points: 10, created_at: confirmations[4].created_at },
+    { user_id: USER_IDS.AHMAD, action: 'confirmation_vote', points: 10, created_at: new Date(now - 1.5 * 24 * 60 * 60 * 1000).toISOString() },
+    { user_id: USER_IDS.AHMAD, action: 'confirmation_vote', points: 10, created_at: new Date(now - 7.5 * 24 * 60 * 60 * 1000).toISOString() },
     { user_id: USER_IDS.AHMAD, action: 'confirmation_vote', points: 10, created_at: new Date(now - 18 * 24 * 60 * 60 * 1000).toISOString() },
     
     // Resolution confirmed (as resolver): 1 × 15 = 15
@@ -514,8 +514,8 @@ async function main() {
     { user_id: USER_IDS.MEI_LING, action: 'comment_posted', points: 5, created_at: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString() },
     
     // Confirmations: 2 × 10 = 20
-    { user_id: USER_IDS.MEI_LING, action: 'confirmation_vote', points: 10, created_at: confirmations[1].created_at },
-    { user_id: USER_IDS.MEI_LING, action: 'confirmation_vote', points: 10, created_at: confirmations[5].created_at },
+    { user_id: USER_IDS.MEI_LING, action: 'confirmation_vote', points: 10, created_at: new Date(now - 1.3 * 24 * 60 * 60 * 1000).toISOString() },
+    { user_id: USER_IDS.MEI_LING, action: 'confirmation_vote', points: 10, created_at: new Date(now - 7.2 * 24 * 60 * 60 * 1000).toISOString() },
     
     // Badge unlock: 1 × 10 = 10
     { user_id: USER_IDS.MEI_LING, action: 'badge_unlocked', points: 10, created_at: badges[5].awarded_at },
@@ -538,7 +538,7 @@ async function main() {
     { user_id: USER_IDS.RAJESH, action: 'comment_posted', points: 5, created_at: comments[22].created_at },
     
     // Confirmations: 2 × 10 = 20 (would be 30 but that exceeds 85, so just 1)
-    { user_id: USER_IDS.RAJESH, action: 'confirmation_vote', points: 10, created_at: confirmations[2].created_at },
+    { user_id: USER_IDS.RAJESH, action: 'confirmation_vote', points: 10, created_at: new Date(now - 1.1 * 24 * 60 * 60 * 1000).toISOString() },
     // Rajesh total: 50 + 25 + 10 = 85 ✓
   ];
 

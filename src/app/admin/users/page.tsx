@@ -49,18 +49,20 @@ export default async function UsersPage() {
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4 pb-24">
       <h2 className="text-lg font-semibold">Users ({formattedUsers.length})</h2>
-      <div className="rounded-md border">
-        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 p-3 border-b bg-muted/50 text-sm font-medium text-muted-foreground">
-          <span>User</span>
-          <span>Reports</span>
-          <span>Flags</span>
-          <span>Actions</span>
+      <div className="rounded-md border overflow-x-auto">
+        <div className="min-w-[500px]">
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 p-3 border-b bg-muted/50 text-sm font-medium text-muted-foreground">
+            <span>User</span>
+            <span>Reports</span>
+            <span>Flags</span>
+            <span>Actions</span>
+          </div>
+          {formattedUsers.map((user) => (
+            <UserRow key={user.id} user={user} />
+          ))}
         </div>
-        {formattedUsers.map((user) => (
-          <UserRow key={user.id} user={user} />
-        ))}
       </div>
     </div>
   );

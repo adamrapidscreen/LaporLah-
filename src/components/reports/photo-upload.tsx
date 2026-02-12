@@ -81,7 +81,7 @@ export function PhotoUpload({ onUpload, onRemove }: PhotoUploadProps) {
         <div
           onClick={() => inputRef.current?.click()}
           className={cn(
-            'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-8 cursor-pointer transition-colors hover:border-primary/50 hover:bg-accent/50',
+            'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-8 cursor-pointer transition-colors hover:border-primary/50 hover:bg-accent/50 min-h-[120px]',
             uploading && 'pointer-events-none opacity-50'
           )}
         >

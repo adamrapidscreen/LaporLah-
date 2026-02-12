@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { LogOut, Plus, User } from 'lucide-react';
+import { LogOut, Plus, User, Settings2 } from 'lucide-react';
 
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -75,6 +75,11 @@ export function TopNav({ userId, initialUnreadCount = 0 }: TopNavProps) {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/settings">
+              <Settings2 className="h-5 w-5" />
+            </Link>
+          </Button>
           <ThemeToggle />
           {userId ? (
             <NotificationBell userId={userId} initialUnreadCount={initialUnreadCount} />

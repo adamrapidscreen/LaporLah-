@@ -51,7 +51,7 @@ export function StatusUpdate({
 
   return (
     <Button onClick={() => handleUpdate(nextStatus)} disabled={isPending} variant="outline" size="sm">
-      {isPending ? 'Updating...' : `→ ${nextConfig.labelMs}`}
+      {isPending ? 'Updating...' : `Mark as ${nextConfig.labelEn} →`}
     </Button>
   );
 }

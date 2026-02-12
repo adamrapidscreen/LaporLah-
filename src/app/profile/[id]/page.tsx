@@ -92,7 +92,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
     .eq('user_id', id);
 
   return (
-    <div className="space-y-6 p-4 max-w-lg mx-auto">
+    <div className="space-y-6 p-4 max-w-lg mx-auto pb-24">
       <CivicCard
         user={{
           full_name: typedUser.full_name,

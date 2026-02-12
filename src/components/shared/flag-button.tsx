@@ -53,11 +53,11 @@ export function FlagButton({ type, targetId }: FlagButtonProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive min-h-[44px] min-w-[44px]">
           <Flag className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-32px)]">
         <DialogHeader>
           <DialogTitle>Report this {type}</DialogTitle>
         </DialogHeader>

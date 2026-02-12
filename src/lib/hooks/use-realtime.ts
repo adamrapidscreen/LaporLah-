@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { createClient } from '@/lib/supabase/client';
 
-import type { RealtimePostgresInsertPayload } from '@supabase/supabase-js';
+import type { RealtimePostgresInsertPayload, RealtimeChannel } from '@supabase/supabase-js';
 
 interface UseRealtimeOptions {
   table: string;
@@ -19,25 +19,36 @@ export function useRealtime({
 }: UseRealtimeOptions) {
   useEffect(() => {
     const supabase = createClient();
+    let channel: RealtimeChannel | null = null;
+    let mounted = true;
 
-    const channel = supabase
-      .channel(`${table}-changes`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table,
-          filter,
-        },
-        (payload) => {
-          onInsert?.(payload);
-        }
-      )
-      .subscribe();
+    // Defer subscription to avoid React Strict Mode / HMR cleanup before connection
+    const timeoutId = setTimeout(() => {
+      if (!mounted) return;
+
+      channel = supabase
+        .channel(`${table}-changes`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table,
+            filter,
+          },
+          (payload) => {
+            onInsert?.(payload);
+          }
+        )
+        .subscribe();
+    }, 100);
 
     return () => {
-      supabase.removeChannel(channel);
+      mounted = false;
+      clearTimeout(timeoutId);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [table, filter, onInsert]);
 }

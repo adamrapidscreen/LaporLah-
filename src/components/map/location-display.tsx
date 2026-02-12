@@ -11,9 +11,11 @@ interface LocationDisplayProps {
 
 export function LocationDisplay({ lat, lng, zoom = 15 }: LocationDisplayProps) {
   return (
-    <MapContainer center={[lat, lng]} zoom={zoom} className="h-48 w-full rounded-lg">
+    <div className="relative z-0 rounded-xl overflow-hidden h-[180px]">
+      <MapContainer center={[lat, lng]} zoom={zoom} className="h-full w-full">
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <Marker position={[lat, lng]} />
     </MapContainer>
+    </div>
   );
 }

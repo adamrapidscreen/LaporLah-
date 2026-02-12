@@ -10,13 +10,13 @@ export type ReportStatus = (typeof STATUS_FLOW)[number];
 
 export const statusConfig: Record<
   ReportStatus,
-  { bg: string; text: string; label: string; labelMs: string }
+  { labelEn: string; labelMs: string; color: string; text: string }
 > = {
-  open: { bg: 'bg-blue-500/15', text: 'text-blue-400', label: 'Open', labelMs: 'Dibuka' },
-  acknowledged: { bg: 'bg-purple-500/15', text: 'text-purple-400', label: 'Ack\'d', labelMs: 'Diakui' },
-  in_progress: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'In Progress', labelMs: 'Dalam Proses' },
-  resolved: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Resolved', labelMs: 'Diselesaikan' },
-  closed: { bg: 'bg-gray-500/15', text: 'text-gray-400', label: 'Closed', labelMs: 'Ditutup ✓' },
+  open: { labelEn: 'Open', labelMs: 'Dibuka', color: 'status-open', text: 'text-status-open' },
+  acknowledged: { labelEn: 'Acknowledged', labelMs: 'Diakui', color: 'status-acknowledged', text: 'text-status-acknowledged' },
+  in_progress: { labelEn: 'In Progress', labelMs: 'Dalam Proses', color: 'status-in-progress', text: 'text-status-in-progress' },
+  resolved: { labelEn: 'Resolved', labelMs: 'Diselesaikan', color: 'status-resolved', text: 'text-status-resolved' },
+  closed: { labelEn: 'Closed', labelMs: 'Ditutup', color: 'status-closed', text: 'text-status-closed' },
 };
 
 export function getStatusIndex(status: ReportStatus): number {

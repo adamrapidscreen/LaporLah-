@@ -1,5 +1,7 @@
 import { ReportCard } from '@/components/reports/report-card';
 import { ReportFeed } from '@/components/reports/report-feed';
+import { GreetingHeader } from '@/components/layout/greeting-header';
+import { CommunityPulse } from '@/components/reports/community-pulse';
 import { EmptyState } from '@/components/shared/empty-state';
 import { createClient } from '@/lib/supabase/server';
 import type { Report } from '@/lib/types';
@@ -37,20 +39,22 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const { data: reports } = await query;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
-      {/* Filter Bar */}
-      <ReportFeed />
-
+    <div className="mx-auto max-w-lg pb-24">
+      <GreetingHeader />
+      <CommunityPulse />
+      <ReportFeed searchStatus={status} searchCategory={category} />
       {/* Report List */}
       {!reports || reports.length === 0 ? (
         <EmptyState
-          title="No reports found"
-          description="Try adjusting your filters or be the first to report!"
+          emoji="📝"
+          title="No reports yet"
+          subtitle="Be the first to Lapor!"
+          action={{ label: "Create Report", href: "/report/new" }}
         />
       ) : (
         <div className="mt-3 space-y-3">
-          {(reports as Report[]).map((report) => (
-            <ReportCard key={report.id} report={report} />
+          {(reports as Report[]).map((report, index) => (
+            <ReportCard key={report.id} report={report} priority={index === 0} />
           ))}
         </div>
       )}

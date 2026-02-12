@@ -7,9 +7,9 @@ export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 pb-24">
       <h2 className="text-lg font-semibold">Overview</h2>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <StatCard title="Total Reports" value={stats.totalReports} icon={FileText} />
         <StatCard title="Open" value={stats.open} icon={AlertTriangle} />
         <StatCard title="Acknowledged" value={stats.acknowledged} icon={Clock} />
