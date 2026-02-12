@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation';
 
 import { z } from 'zod';
 
+import { awardPoints, checkAndAwardBadges, updateStreak } from '@/lib/actions/gamification';
 import { STATUS_FLOW, statusConfig, type ReportStatus } from '@/lib/constants/statuses';
 import { createClient } from '@/lib/supabase/server';
-import { awardPoints, checkAndAwardBadges, updateStreak } from '@/lib/actions/gamification';
 import type { ActionState } from '@/lib/types';
 
 const createReportSchema = z.object({

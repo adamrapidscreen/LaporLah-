@@ -1,8 +1,8 @@
-import { Card } from '@/components/ui/card';
-import { StatsGrid } from '@/components/profile/stats-grid';
 import { StreakDisplay } from '@/components/gamification/streak-display';
-import { cn } from '@/lib/utils';
+import { StatsGrid } from '@/components/profile/stats-grid';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Assuming these are shadcn/ui components
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface CivicCardProps {
   user: {

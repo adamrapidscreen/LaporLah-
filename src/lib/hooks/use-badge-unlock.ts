@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+
 import type { BadgeType, BadgeTier } from '@/lib/constants/badges';
 
 interface NewBadge {

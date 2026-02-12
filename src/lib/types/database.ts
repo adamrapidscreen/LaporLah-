@@ -248,21 +248,24 @@ export type Database = {
       flags: {
         Row: {
           id: string;
-          report_id: string;
+          report_id: string | null;
+          comment_id: string | null;
           user_id: string;
           reason: string;
           created_at: string;
         };
         Insert: {
           id?: string;
-          report_id: string;
+          report_id?: string | null;
+          comment_id?: string | null;
           user_id: string;
           reason: string;
           created_at?: string;
         };
         Update: {
           id?: string;
-          report_id?: string;
+          report_id?: string | null;
+          comment_id?: string | null;
           user_id?: string;
           reason?: string;
           created_at?: string;

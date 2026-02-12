@@ -1,8 +1,8 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
-import { POINTS_PER_ACTION, type PointAction } from '@/lib/constants/points';
 import type { BadgeType, BadgeTier } from '@/lib/constants/badges';
+import { POINTS_PER_ACTION, type PointAction } from '@/lib/constants/points';
+import { createClient } from '@/lib/supabase/server';
 
 interface NewBadge {
   new_badge_type: BadgeType;

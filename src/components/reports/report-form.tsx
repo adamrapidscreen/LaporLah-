@@ -1,10 +1,12 @@
 'use client';
 
 import { useActionState, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
 
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
+
+import { BadgeUnlock } from '@/components/gamification/badge-unlock'; // Import the component
 import { PhotoUpload } from '@/components/reports/photo-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,9 +20,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { createReport } from '@/lib/actions/reports';
 import { CATEGORIES } from '@/lib/constants/categories';
-import type { ActionState } from '@/lib/types';
 import { useBadgeUnlock } from '@/lib/hooks/use-badge-unlock'; // Import the hook
-import { BadgeUnlock } from '@/components/gamification/badge-unlock'; // Import the component
+import type { ActionState } from '@/lib/types';
 
 const LocationPicker = dynamic(
   () => import('@/components/map/location-picker').then((mod) => mod.LocationPicker),

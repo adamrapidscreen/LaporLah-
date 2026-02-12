@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { CivicCard } from '@/components/profile/civic-card';
+
 import { BadgeCard } from '@/components/gamification/badge-card';
 import { ActivityFeed } from '@/components/profile/activity-feed';
+import { CivicCard } from '@/components/profile/civic-card';
 import { BADGE_DEFINITIONS, type BadgeType, type BadgeTier } from '@/lib/constants/badges';
+import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/types/database';
 
 export const metadata = {
