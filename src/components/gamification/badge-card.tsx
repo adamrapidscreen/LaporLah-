@@ -67,6 +67,9 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
   const nextThreshold = nextTier ? badge.thresholds[nextTier] : badge.thresholds[tier];
   const isMaxed = tier === 'gold';
 
+  // For max tier, show at least the gold threshold instead of 0
+  const displayedCount = isMaxed ? badge.thresholds[tier] : currentCount;
+
   // Progress calculation
   const progressPercent = isMaxed
     ? 100
@@ -94,7 +97,7 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
         </div>
         <p className="text-xs text-muted-foreground">
           {isMaxed
-            ? `${currentCount} ${badge.metric} — Tahap tertinggi!`
+            ? `${displayedCount} ${badge.metric}, Tahap tertinggi!`
             : `${currentCount}/${nextThreshold} ${badge.metric}`}
         </p>
       </div>

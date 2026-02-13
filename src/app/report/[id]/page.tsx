@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { formatDistanceToNow } from 'date-fns';
-import { Check, ChevronLeft, MapPin, Eye, Flag, Send, MessageCircle } from 'lucide-react';
+import { ChevronLeft, MapPin, Eye, MessageCircle } from 'lucide-react';
 
 export const revalidate = 15; // Revalidate every 15 seconds (more dynamic)
 
@@ -21,8 +21,6 @@ import { EmptyState } from '@/components/shared/empty-state';
 import { FlagButton } from '@/components/shared/flag-button';
 import { FollowButton } from '@/components/shared/follow-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { CATEGORIES } from '@/lib/constants/categories';
 import { STATUS_FLOW, statusConfig } from '@/lib/constants/statuses';
 import { createClient } from '@/lib/supabase/server';

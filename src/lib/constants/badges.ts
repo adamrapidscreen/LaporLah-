@@ -31,7 +31,7 @@ export const BADGE_DEFINITIONS = {
       silver: 10,
       gold: 25,
     },
-    metric: 'comments on others\' reports',
+    metric: 'comments done',
   },
   closer: {
     name: 'Closer',

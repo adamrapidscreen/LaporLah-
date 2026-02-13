@@ -18,6 +18,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
+import { Logo } from './logo';
 import { ThemeToggle } from './theme-toggle';
 
 interface TopNavProps {
@@ -37,7 +38,7 @@ export function TopNav({ userId, initialUnreadCount = 0 }: TopNavProps) {
   };
 
   const navLinks = [
-    { href: '/', label: 'Home' },
+    { href: userId ? '/feed' : '/', label: 'Home' },
     { href: '/followed', label: 'Followed' },
     ...(userId ? [{ href: '/profile', label: 'Profile' }] : []),
   ];
@@ -46,9 +47,7 @@ export function TopNav({ userId, initialUnreadCount = 0 }: TopNavProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/50 backdrop-blur-xl bg-background/80">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/feed" className="flex items-center gap-0 font-bold text-lg">
-          <span className="text-primary">Lapor</span><span>Lah!</span>
-        </Link>
+        <Logo href={userId ? '/feed' : '/'} size="md" />
 
         {/* Center Nav */}
         <nav className="flex items-center gap-6">

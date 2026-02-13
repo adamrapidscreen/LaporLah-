@@ -38,6 +38,20 @@ export async function updateDisplayName(formData: FormData) {
     return { error: 'Gagal mengemas kini nama / Failed to update name' };
   }
 
+  // 3b. Also update auth user metadata so name persists across logins
+  const { error: authError } = await supabase.auth.updateUser({
+    data: {
+      ...user.user_metadata,
+      full_name: trimmedName,
+    },
+  });
+
+  if (authError) {
+    // Log but don't surface to user; DB update already succeeded
+    // eslint-disable-next-line no-console
+    console.error('[settings] Failed to update auth metadata full_name', authError);
+  }
+
   // 4. Revalidate paths so display name updates everywhere
   revalidatePath('/');
   revalidatePath('/settings');

@@ -1,4 +1,6 @@
 // src/components/layout/greeting-header.tsx
+import { Sparkles } from 'lucide-react';
+
 import { getCurrentUser } from '@/lib/actions/auth';
 import { createClient } from '@/lib/supabase/server';
 
@@ -33,8 +35,21 @@ export async function GreetingHeader({ displayName: propDisplayName }: GreetingH
 
   return (
     <div className="px-4 pt-6 pb-4">
-      <ClientGreeting userName={displayName ?? null} />
-      <p className="text-sm text-muted-foreground mt-1">Komuniti Pantau, Komuniti Baiki</p>
+      <div className="rounded-2xl border border-border/60 bg-gradient-to-r from-primary/15 via-primary/5 to-background/80 px-4 py-3 sm:px-5 sm:py-4 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <ClientGreeting userName={displayName ?? null} />
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Komuniti Pantau, Komuniti Baiki
+            </p>
+          </div>
+
+          <div className="inline-flex items-center gap-2 self-start rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] sm:text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>Built for Malaysian communities</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

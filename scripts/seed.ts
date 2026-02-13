@@ -1,7 +1,10 @@
 // LaporLah Seed Script - Realistic Malaysian Community Data
 // Run with: npm run seed
 
+import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+
+dotenv.config({ path: '.env.local' });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -17,12 +20,12 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { persistSession: false },
 });
 
-// Fixed UUIDs for consistent seed data
-const USER_IDS = {
-  SITI: '11111111-1111-1111-1111-111111111111',
-  AHMAD: '22222222-2222-2222-2222-222222222222',
-  MEI_LING: '33333333-3333-3333-3333-333333333333',
-  RAJESH: '44444444-4444-4444-4444-444444444444',
+// User IDs will be populated after creating auth users
+const USER_IDS: Record<string, string> = {
+  SITI: '',
+  AHMAD: '',
+  MEI_LING: '',
+  RAJESH: '',
 };
 
 const REPORT_IDS = {
@@ -41,6 +44,43 @@ const REPORT_IDS = {
 async function main() {
   console.log('🌱 Starting LaporLah seed script...\n');
 
+  // Step 0: Create auth users with admin API (so FK constraint is satisfied)
+  console.log('🔐 Creating auth users...');
+  const authUserSpecs = [
+    { key: 'SITI', email: 'siti.demo@laporlah.my', name: 'Siti Nurhaliza' },
+    { key: 'AHMAD', email: 'ahmad.demo@laporlah.my', name: 'Ahmad Faiz' },
+    { key: 'MEI_LING', email: 'meiling.demo@laporlah.my', name: 'Mei Ling Tan' },
+    { key: 'RAJESH', email: 'rajesh.demo@laporlah.my', name: 'Rajesh Kumar' },
+  ];
+
+  for (const spec of authUserSpecs) {
+    const { data, error } = await supabase.auth.admin.createUser({
+      email: spec.email,
+      email_confirm: true,
+      user_metadata: { full_name: spec.name },
+    });
+    if (error) {
+      // If user exists, get their ID
+      if (error.message.includes('already registered') || error.message.includes('already exists') || error.message.includes('already been registered')) {
+        const { data: existingUsers } = await supabase.auth.admin.listUsers();
+        const existing = existingUsers?.users.find(u => u.email === spec.email);
+        if (existing) {
+          USER_IDS[spec.key] = existing.id;
+          console.log(`   User ${spec.email} already exists (ID: ${existing.id})`);
+        } else {
+          throw new Error(`User ${spec.email} exists but couldn't fetch ID`);
+        }
+      } else {
+        console.error(`❌ Failed to create auth user ${spec.email}:`, error);
+        throw error;
+      }
+    } else {
+      USER_IDS[spec.key] = data.user.id;
+      console.log(`   ✓ Created ${spec.email} (ID: ${data.user.id})`);
+    }
+  }
+  console.log('✓ Created/verified 4 auth users\n');
+
   // Step 1: Clean existing seed data
   console.log('🧹 Cleaning existing seed data...');
   await supabase.from('point_events').delete().gte('id', '00000000-0000-0000-0000-000000000000');
@@ -53,12 +93,12 @@ async function main() {
   await supabase.from('reports').delete().gte('id', '00000000-0000-0000-0000-000000000000');
   console.log('✓ Cleaned existing data\n');
 
-  // Step 2: Create demo users
+  // Step 2: Create demo users (public.users table)
   console.log('👥 Creating demo users...');
   const users = [
     {
       id: USER_IDS.SITI,
-      email: 'admin@laporlah.my',
+      email: 'siti.demo@laporlah.my',
       full_name: 'Siti Nurhaliza',
       avatar_url: `https://ui-avatars.com/api/?name=Siti+Nurhaliza&background=10b981&color=fff`,
       role: 'admin',
@@ -70,7 +110,7 @@ async function main() {
     },
     {
       id: USER_IDS.AHMAD,
-      email: 'ahmad@laporlah.my',
+      email: 'ahmad.demo@laporlah.my',
       full_name: 'Ahmad Faiz',
       avatar_url: `https://ui-avatars.com/api/?name=Ahmad+Faiz&background=3b82f6&color=fff`,
       role: 'user',
@@ -82,7 +122,7 @@ async function main() {
     },
     {
       id: USER_IDS.MEI_LING,
-      email: 'mei.ling@laporlah.my',
+      email: 'meiling.demo@laporlah.my',
       full_name: 'Mei Ling Tan',
       avatar_url: `https://ui-avatars.com/api/?name=Mei+Ling&background=f59e0b&color=000`,
       role: 'user',
@@ -94,7 +134,7 @@ async function main() {
     },
     {
       id: USER_IDS.RAJESH,
-      email: 'raj@laporlah.my',
+      email: 'rajesh.demo@laporlah.my',
       full_name: 'Rajesh Kumar',
       avatar_url: `https://ui-avatars.com/api/?name=Rajesh+Kumar&background=a855f7&color=fff`,
       role: 'user',
@@ -121,6 +161,7 @@ async function main() {
       description: 'The streetlight near Block A has been out for 3 days already. Very dark at night, safety concern for residents walking home from the shops. Can see the light pole number is SM-401.',
       category: 'infrastructure',
       status: 'open',
+      photo_url: '/report-photos/r1-broken-streetlight-cyberjaya.jpg',
       latitude: 2.9188,
       longitude: 101.6538,
       area_name: 'Cyberjaya, Selangor',
@@ -134,6 +175,7 @@ async function main() {
       description: 'The rubbish bins near the lake view area are overflowing since yesterday. Smell very bad and got flies everywhere. Tourists also complaining. Needs urgent collection!',
       category: 'cleanliness',
       status: 'acknowledged',
+      photo_url: '/report-photos/r2-overflowing-bins-putrajaya-central-park.jpg',
       latitude: 2.9264,
       longitude: 101.6964,
       area_name: 'Putrajaya',
@@ -147,6 +189,7 @@ async function main() {
       description: 'Very big pothole on the main road near the traffic light. Already saw 2 motorcycles nearly fall this morning. The hole is about 50cm wide and very deep. Please fix ASAP before someone gets hurt!',
       category: 'infrastructure',
       status: 'in_progress',
+      photo_url: '/report-photos/r3-deep-pothole-jalan-pjs7.jpg',
       latitude: 3.1073,
       longitude: 101.6067,
       area_name: 'Petaling Jaya, Selangor',
@@ -160,6 +203,7 @@ async function main() {
       description: 'The swing set at Taman Tasik Shah Alam is broken and very rusty. One swing is hanging by only one chain. Not safe for kids at all. Needs urgent repair or replacement.',
       category: 'facilities',
       status: 'resolved',
+      photo_url: '/report-photos/r4-broken-swing-taman-tasik-shah-alam.jpg',
       latitude: 3.0733,
       longitude: 101.5185,
       area_name: 'Shah Alam, Selangor',
@@ -175,6 +219,7 @@ async function main() {
       description: 'Got pack of about 5-6 stray dogs roaming near the SS15 park every evening. They bark very aggressive at joggers and cyclists. One uncle almost fell off his bicycle yesterday. Please relocate them safely.',
       category: 'safety',
       status: 'closed',
+      photo_url: '/report-photos/r5-stray-dogs-ss15-park.jpg',
       latitude: 3.0565,
       longitude: 101.5853,
       area_name: 'Subang Jaya, Selangor',
@@ -190,6 +235,7 @@ async function main() {
       description: 'Someone dumping construction waste behind the shophouses on Jalan Gasing. Got broken tiles, cement bags, and furniture. Been there for 2 weeks. Mosquitoes breeding also.',
       category: 'cleanliness',
       status: 'acknowledged',
+      photo_url: '/report-photos/r6-illegal-dumping-behind-shophouses.jpg',
       latitude: 3.1095,
       longitude: 101.6478,
       area_name: 'Petaling Jaya, Selangor',
@@ -203,6 +249,7 @@ async function main() {
       description: 'Traffic light at Persiaran Surian junction not working since this morning. All lights stuck on red. Causing massive jam during peak hours. Very dangerous also.',
       category: 'infrastructure',
       status: 'in_progress',
+      photo_url: '/report-photos/r7-broken-traffic-light-persiaran-surian.jpg',
       latitude: 3.1932,
       longitude: 101.6092,
       area_name: 'Kota Damansara, Selangor',
@@ -216,6 +263,7 @@ async function main() {
       description: 'The roof at Section 7 community hall is leaking in multiple places. Every time rains, the floor becomes very slippery. Cannot use the hall properly. Need urgent fixing.',
       category: 'facilities',
       status: 'open',
+      photo_url: '/report-photos/r8-community-hall-roof-leaking-section7.jpg',
       latitude: 3.0681,
       longitude: 101.5043,
       area_name: 'Shah Alam, Selangor',
@@ -229,6 +277,7 @@ async function main() {
       description: 'The old abandoned shophouse on Jalan SS2 got people going in and out at night. Looks suspicious. Neighbors worried about safety. Maybe can check or board it up properly?',
       category: 'safety',
       status: 'acknowledged',
+      photo_url: '/report-photos/r9-suspicious-activity-abandoned-building-ss2.jpg',
       latitude: 3.1176,
       longitude: 101.6176,
       area_name: 'Petaling Jaya, Selangor',
@@ -242,6 +291,7 @@ async function main() {
       description: 'Our area got no water since yesterday evening. Checked with neighbors, everyone same problem. Air Selangor app showing no updates. Very inconvenient, got elderly and small kids here.',
       category: 'other',
       status: 'in_progress',
+      photo_url: '/report-photos/r10-no-water-supply-taman-sri-muda.jpg',
       latitude: 3.0166,
       longitude: 101.4826,
       area_name: 'Shah Alam, Selangor',
@@ -601,15 +651,15 @@ async function main() {
   console.log(`   • ${notifications.length} notifications created`);
   console.log(`   • ${flags.length} flagged items for admin dashboard`);
   console.log('\n🎉 Database ready for demo!\n');
-  console.log('📝 Test accounts:');
-  console.log('   Admin: admin@laporlah.my (Siti Nurhaliza)');
-  console.log('   User:  ahmad@laporlah.my (Ahmad Faiz)');
-  console.log('   User:  mei.ling@laporlah.my (Mei Ling Tan)');
-  console.log('   User:  raj@laporlah.my (Rajesh Kumar)');
+  console.log('📝 Demo seed users created:');
+  console.log('   Admin: siti.demo@laporlah.my (Siti Nurhaliza)');
+  console.log('   User:  ahmad.demo@laporlah.my (Ahmad Faiz)');
+  console.log('   User:  meiling.demo@laporlah.my (Mei Ling Tan)');
+  console.log('   User:  rajesh.demo@laporlah.my (Rajesh Kumar)');
   console.log('\n💡 Next steps:');
-  console.log('   1. Sign in with Google OAuth using any of the above emails');
-  console.log('   2. Admin user can access /admin dashboard');
-  console.log('   3. Explore feed, reports, profile pages, and gamification');
+  console.log('   1. These are demo users with realistic data (reports, comments, badges)');
+  console.log('   2. Sign in with your own Google account to see the feed populated with seed data');
+  console.log('   3. To view a specific demo user profile, visit /profile/[user_id] (e.g., /profile/11111111-1111-1111-1111-111111111111 for Siti)');
 }
 
 main().catch((error) => {

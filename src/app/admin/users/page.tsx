@@ -14,17 +14,6 @@ interface UserWithCounts {
   flag_count: number;
 }
 
-interface UserQueryResult {
-  id: string;
-  email: string;
-  full_name: string;
-  avatar_url: string | null;
-  role: string;
-  is_banned: boolean;
-  reports?: { count: number }[];
-  flags?: { count: number }[];
-}
-
 export default async function UsersPage() {
   const supabase = createAdminClient();
 

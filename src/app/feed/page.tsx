@@ -2,7 +2,7 @@ import { PenSquare } from 'lucide-react';
 
 import { GreetingHeader } from '@/components/layout/greeting-header';
 import { PresenceCounter } from '@/components/layout/presence-counter';
-import { CommunityPulse, type CommunityStats } from '@/components/reports/community-pulse';
+import { CommunityPulse } from '@/components/reports/community-pulse';
 import { ReportCard } from '@/components/reports/report-card';
 import { ReportFeed } from '@/components/reports/report-feed';
 import { EmptyState } from '@/components/shared/empty-state';

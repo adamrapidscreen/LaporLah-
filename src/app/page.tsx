@@ -1,9 +1,10 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+
+import Image from 'next/image';
 import Link from 'next/link';
-import { LANG, type Lang } from '@/lib/constants/landing-i18n';
+
 import {
   Camera,
   BarChart3,
@@ -16,9 +17,12 @@ import {
   Globe,
   Star,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+
+import { Logo } from '@/components/layout/logo';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { LANG, type Lang } from '@/lib/constants/landing-i18n';
+import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>('en');
@@ -31,10 +35,10 @@ export default function LandingPage() {
   const [statsAnimated, setStatsAnimated] = useState(false);
   const [statCounts, setStatCounts] = useState({ reports: 0, resolved: 0, citizens: 0, areas: 0 });
 
-  const targets = { reports: 247, resolved: 89, citizens: 156, areas: 12 };
-
   useEffect(() => {
     if (!statsRef.current) return;
+
+    const targets = { reports: 247, resolved: 89, citizens: 156, areas: 12 };
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -68,7 +72,6 @@ export default function LandingPage() {
     );
 
     observer.observe(statsRef.current);
-
     return () => observer.disconnect();
   }, [statsAnimated]);
 
@@ -100,9 +103,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="text-xl font-bold">
-            <span className="text-primary">Lapor</span><span>Lah!</span>
-          </div>
+          <Logo href="/" size="md" />
 
           {/* Nav links - hidden on mobile */}
           <div className="hidden md:flex items-center gap-8">
@@ -387,7 +388,7 @@ export default function LandingPage() {
       <footer className="border-t border-border py-8 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
-            <div className="text-lg font-bold text-foreground">LaporLah</div>
+            <Logo href="/" size="sm" />
             <div className="text-sm text-muted-foreground italic mt-1">{t.footer_tagline}</div>
           </div>
           <div className="flex flex-col items-center sm:items-end gap-2">

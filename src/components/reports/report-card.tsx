@@ -6,7 +6,7 @@ import { MapPin, Users, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import type { Report } from '@/lib/types';
-import { cn, formatRelativeTime, getStatusColor } from '@/lib/utils';
+import { cn, formatRelativeTime } from '@/lib/utils';
 
 import { CategoryTag } from './category-tag';
 import { StatusPill } from './status-pill';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import L from 'leaflet';
 import { MapPin, Crosshair } from 'lucide-react';
@@ -71,7 +71,6 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
   const { latitude, longitude, accuracy, loading, error, requestLocation } = useGeolocation();
   const [position, setPosition] = useState<[number, number]>(DEFAULT_CENTER);
   const [areaName, setAreaName] = useState<string>('');
-  const mapKeyRef = useRef(0);
 
   const handleGeocode = useCallback(async (lat: number, lng: number) => {
     const name = await reverseGeocode(lat, lng);
@@ -82,7 +81,9 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
   useEffect(() => {
     if (latitude && longitude) {
       // Update position to show GPS coordinates on map
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosition([latitude, longitude]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       handleGeocode(latitude, longitude);
     }
   }, [latitude, longitude, handleGeocode]);
@@ -101,7 +102,6 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
           zoom={DEFAULT_ZOOM}
           className="h-full w-full"
           scrollWheelZoom={false}
-          key={mapKeyRef.current}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

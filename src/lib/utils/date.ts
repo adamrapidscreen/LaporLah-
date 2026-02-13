@@ -1,7 +1,7 @@
 const MINUTE = 60;
 const HOUR = 3600;
 const DAY = 86400;
-const WEEK = 604800; // Not used currently but kept for context
+// const WEEK = 604800; // Not used currently but kept for context
 
 export function formatRelativeTime(dateString: string): string {
   const seconds = Math.floor(

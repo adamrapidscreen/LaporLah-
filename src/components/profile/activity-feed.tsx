@@ -1,6 +1,6 @@
-import { FileEdit, MessageCircle, Users, CheckCircle, PartyPopper, Trophy, Circle, Minus } from 'lucide-react';
+import { FileEdit, MessageCircle, Users, CheckCircle, PartyPopper, Trophy, Circle } from 'lucide-react';
 
-import { cn, formatRelativeTime } from '@/lib/utils'; // Import the utility
+import { formatRelativeTime } from '@/lib/utils'; // Import the utility
 
 const ACTION_LABELS: Record<string, { icon: React.ElementType; label: string }> = {
   create_report: { icon: FileEdit, label: 'Mencipta laporan' },
