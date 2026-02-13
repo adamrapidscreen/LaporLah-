@@ -1,3 +1,5 @@
+import { Flame } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 interface StreakDisplayProps {
@@ -15,7 +17,7 @@ export function StreakDisplay({ streak, className }: StreakDisplayProps) {
 
   return (
     <span className={cn('text-sm font-medium text-accent', className)}>
-      🔥 {label}
+      <Flame className="inline h-4 w-4 mr-1" /> {label}
     </span>
   );
 }

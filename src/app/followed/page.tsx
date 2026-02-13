@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation';
 
+import { Eye } from 'lucide-react';
+
 import { ReportCard } from '@/components/reports/report-card';
 import { EmptyState } from '@/components/shared/empty-state';
 import { createClient } from '@/lib/supabase/server';
 import type { Report } from '@/lib/types';
 
+export const revalidate = 30; // Revalidate every 30 seconds
 
 export default async function FollowedReportsPage() {
   const supabase = await createClient();
@@ -17,7 +20,8 @@ export default async function FollowedReportsPage() {
     .from('follows')
     .select('report:reports(*, creator:users!user_id(id, full_name, avatar_url))')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(20);
 
   const reports = follows
     ?.map((f: { report: unknown }) => f.report)
@@ -31,7 +35,7 @@ export default async function FollowedReportsPage() {
 
       {reports.length === 0 ? (
         <EmptyState
-          emoji="👁"
+          icon={<Eye className="h-16 w-16" />}
           title="No followed reports"
           subtitle="Follow reports to track progress"
           action={{ label: "Browse Reports", href: "/" }}

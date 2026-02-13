@@ -2,9 +2,10 @@
 
 import { useTransition, useState } from 'react';
 
-import { Countdown } from '@/components/confirmation/countdown';
+import { Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { Countdown } from '@/components/confirmation/countdown';
 import { Button } from '@/components/ui/button';
 import { castVote } from '@/lib/actions/votes';
 
@@ -65,7 +66,7 @@ export function VotePanel({
           variant={currentVote === 'confirmed' ? 'default' : 'outline'}
           className="flex-1 min-h-[44px]"
         >
-          ✅ Sahkan ({votes.confirmed})
+          <Check className="h-4 w-4 mr-2" /> Sahkan ({votes.confirmed})
         </Button>
         <Button
           onClick={() => handleVote('not_yet')}
@@ -73,7 +74,7 @@ export function VotePanel({
           variant={currentVote === 'not_yet' ? 'destructive' : 'outline'}
           className="flex-1 min-h-[44px]"
         >
-          ❌ Belum ({votes.notYet})
+          <X className="h-4 w-4 mr-2" /> Belum ({votes.notYet})
         </Button>
       </div>
 

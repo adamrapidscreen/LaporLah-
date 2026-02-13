@@ -9,10 +9,11 @@ export default async function DebugPage() {
     .select('*', { count: 'exact', head: true });
 
   // Get all users (without nested counts)
-  const { data: allUsers, error: usersError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: allUsers, error: usersError } = await (supabase as any)
     .from('users')
     .select('id, email, full_name, role, is_banned')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false }) as { data: { id: string; email: string; full_name: string; role: string; is_banned: boolean }[] | null; error: { message: string } | null };
 
   // Get all reports
   const { count: reportCount } = await supabase

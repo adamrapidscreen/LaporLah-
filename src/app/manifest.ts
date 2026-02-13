@@ -24,5 +24,21 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'any',
       },
     ],
+    share_target: {
+      action: '/report/new',
+      method: 'POST',
+      enctype: 'multipart/form-data',
+      params: {
+        title: 'title',
+        text: 'description',
+        url: 'url',
+        files: [
+          {
+            name: 'photos',
+            accept: ['image/jpeg', 'image/png', 'image/webp', 'image/*'],
+          },
+        ],
+      },
+    },
   };
 }

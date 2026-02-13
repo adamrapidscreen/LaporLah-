@@ -1,3 +1,5 @@
+import { MessageCircle } from 'lucide-react';
+
 import { CommentBubble, type Comment } from '@/components/comments/comment-bubble';
 import { EmptyState } from '@/components/shared/empty-state';
 import { createClient } from '@/lib/supabase/server';
@@ -10,14 +12,15 @@ export async function CommentList({ reportId }: CommentListProps) {
   const supabase = await createClient();
   const { data: comments } = await supabase
     .from('comments')
-    .select('*, user:users(id, full_name, avatar_url)')
+    .select('id, content, created_at, user:users(id, full_name, avatar_url)')
     .eq('report_id', reportId)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .limit(100);
 
   if (!comments || comments.length === 0) {
     return (
       <EmptyState
-        emoji="💬"
+        icon={<MessageCircle className="h-16 w-16" />}
         title="No comments yet"
         subtitle="Start the conversation"
       />

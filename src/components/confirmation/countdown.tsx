@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
+import { Clock } from 'lucide-react';
+
 import { cn } from '@/lib/utils/cn';
 
 interface CountdownProps {
@@ -45,7 +47,7 @@ export function Countdown({ resolvedAt, className }: CountdownProps) {
         className
       )}
     >
-      ⏱ {timeLeft}
+      <Clock className="inline h-3.5 w-3.5 mr-1" /> {timeLeft}
     </span>
   );
 }

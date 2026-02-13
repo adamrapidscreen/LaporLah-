@@ -48,20 +48,66 @@ export function FeedSkeleton() {
 
 export function ReportDetailSkeleton() {
   return (
-    <div className="space-y-4 p-4">
-      <Skeleton className="aspect-video w-full rounded-lg" />
-      <div className="flex gap-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-3 w-3 rounded-full" />
-        ))}
+    <div className="mx-auto max-w-2xl pb-24">
+      {/* Top bar skeleton */}
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between">
+        <Skeleton className="h-4 w-12" />
+        <Skeleton className="h-8 w-8 rounded-md" />
       </div>
-      <Skeleton className="h-8 w-3/4" />
-      <Skeleton className="h-5 w-20 rounded-full" />
-      <Skeleton className="h-48 w-full rounded-lg" />
-      <Skeleton className="h-20 w-full" />
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-10 w-10 rounded-full" />
-        <Skeleton className="h-5 w-32" />
+
+      {/* Photo skeleton */}
+      <Skeleton className="h-[300px] w-full" />
+
+      {/* Content skeleton */}
+      <div className="px-4 pt-4 space-y-3">
+        {/* Category tag */}
+        <Skeleton className="h-6 w-24 rounded-full" />
+
+        {/* Title */}
+        <Skeleton className="h-7 w-3/4" />
+
+        {/* Viewers */}
+        <Skeleton className="h-4 w-32" />
+
+        {/* Description */}
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+
+        {/* Stepper skeleton */}
+        <div className="flex items-center gap-2 mt-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-2 flex-1">
+              <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+              {i < 4 && <Skeleton className="h-0.5 flex-1" />}
+            </div>
+          ))}
+        </div>
+
+        {/* Map skeleton */}
+        <Skeleton className="h-[180px] rounded-xl mt-6" />
+
+        {/* Creator info skeleton */}
+        <div className="flex items-center gap-3 mt-6">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+
+        {/* Action buttons skeleton */}
+        <div className="flex gap-2 mt-4">
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-10" />
+        </div>
+
+        {/* Comments skeleton */}
+        <div className="space-y-3 mt-6">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-lg" />
+          ))}
+        </div>
       </div>
     </div>
   );

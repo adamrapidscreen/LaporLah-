@@ -18,11 +18,11 @@ interface ReportCardProps {
 
 export function ReportCard({ report, priority = false }: ReportCardProps) {
   return (
-    <Link href={`/report/${report.id}`}>
-      <Card className={cn("overflow-hidden transition-all hover:card-glow", `border-l-[3px] border-${getStatusColor(report.status)}/70`)}>
+    <Link href={`/report/${report.id}`} prefetch={true}>
+      <Card className={cn("overflow-hidden transition-all hover:card-glow")}>
         {/* Photo Thumbnail */}
         {report.photo_url ? (
-          <div className="relative aspect-video w-full">
+          <div className="relative aspect-video w-full rounded-t-xl overflow-hidden">
             <Image
               src={report.photo_url}
               alt={report.title}

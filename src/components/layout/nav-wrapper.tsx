@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { BottomNav } from './bottom-nav';
 import { TopNav } from './top-nav';
 
-const HIDE_NAV_ROUTES = ['/login'];
+const HIDE_NAV_ROUTES = ['/login', '/'];
 
 export function NavWrapper() {
   const pathname = usePathname();

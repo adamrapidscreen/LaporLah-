@@ -1,7 +1,13 @@
-import { Lock } from 'lucide-react';
+import { Lock, Lightbulb, Handshake, CheckCircle } from 'lucide-react';
 
 import { BADGE_DEFINITIONS, TIER_COLORS, type BadgeType, type BadgeTier } from '@/lib/constants/badges';
 import { cn } from '@/lib/utils';
+
+const BADGE_ICONS: Record<string, React.ElementType> = {
+  lightbulb: Lightbulb,
+  handshake: Handshake,
+  'check-circle': CheckCircle,
+};
 
 interface BadgeCardProps {
   badgeType: BadgeType;
@@ -12,6 +18,7 @@ interface BadgeCardProps {
 
 export function BadgeCard({ badgeType, tier, currentCount, earned = true }: BadgeCardProps) {
   const badge = BADGE_DEFINITIONS[badgeType];
+  const IconComponent = BADGE_ICONS[badge.icon] ?? Lightbulb;
 
   // Locked state: show progress toward bronze
   if (!earned) {
@@ -22,7 +29,7 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
       <div className="border-2 rounded-lg p-4 space-y-2 border-muted bg-muted/30 opacity-70">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <span className="text-2xl grayscale">{badge.emoji}</span>
+            <IconComponent className="h-8 w-8 grayscale" />
             <Lock className="absolute -bottom-1 -right-1 h-3.5 w-3.5 text-muted-foreground" />
           </div>
           <div>
@@ -68,7 +75,7 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
   return (
     <div className={cn('border-2 rounded-lg p-4 space-y-2', tierColor.border, tierColor.bg)}>
       <div className="flex items-center gap-3">
-        <span className="text-2xl">{badge.emoji}</span>
+        <IconComponent className="h-8 w-8" />
         <div>
           <p className="font-semibold">{badge.name}</p>
           <p className={cn('text-xs font-medium uppercase', tierColor.text)}>{tier}</p>

@@ -1,7 +1,7 @@
 'use client';
 
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Monitor, Moon, Sun } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -27,14 +27,6 @@ export function ThemeSelector() {
         >
           <Sun className="h-4 w-4 mr-2" />
           Light
-        </Button>
-        <Button
-          variant={theme === 'system' ? 'default' : 'outline'}
-          className="flex-1 min-h-[44px]"
-          onClick={() => setTheme('system')}
-        >
-          <Monitor className="h-4 w-4 mr-2" />
-          System
         </Button>
       </div>
     </div>

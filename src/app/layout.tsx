@@ -47,7 +47,7 @@ export default function RootLayout({
           showSpinner={false}
           height={3}
         />
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <NavWrapper />
           <main className="min-h-screen overflow-x-hidden pb-20 md:pb-0">
             {children}

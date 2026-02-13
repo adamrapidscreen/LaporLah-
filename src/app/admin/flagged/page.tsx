@@ -1,5 +1,9 @@
+import { Flag } from 'lucide-react';
+
 import { FlaggedItemCard } from '@/components/admin/flagged-item-card';
 import { getFlaggedItems } from '@/lib/actions/admin';
+
+export const revalidate = 30; // Revalidate every 30 seconds
 
 export default async function FlaggedItemsPage() {
   const items = await getFlaggedItems();
@@ -7,7 +11,7 @@ export default async function FlaggedItemsPage() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <span className="text-6xl mb-4">🏳️</span>
+        <Flag className="h-16 w-16 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold">No flagged items</h3>
         <p className="text-sm text-muted-foreground">All clear! No reports or comments have been flagged.</p>
       </div>

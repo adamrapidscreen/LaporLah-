@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 import L from 'leaflet';
 import { MapPin, Crosshair } from 'lucide-react';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 
 import { Button } from '@/components/ui/button';
 import { useGeolocation } from '@/lib/hooks/use-geolocation';
@@ -53,10 +53,25 @@ function DraggableMarker({
   return <Marker position={position} draggable icon={markerIcon} eventHandlers={eventHandlers} />;
 }
 
+function MapViewUpdater({
+  position,
+  zoom,
+}: {
+  position: [number, number];
+  zoom: number;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(position, zoom, { animate: true });
+  }, [position, zoom, map]);
+  return null;
+}
+
 export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
-  const { latitude, longitude, loading, error, requestLocation } = useGeolocation();
+  const { latitude, longitude, accuracy, loading, error, requestLocation } = useGeolocation();
   const [position, setPosition] = useState<[number, number]>(DEFAULT_CENTER);
   const [areaName, setAreaName] = useState<string>('');
+  const mapKeyRef = useRef(0);
 
   const handleGeocode = useCallback(async (lat: number, lng: number) => {
     const name = await reverseGeocode(lat, lng);
@@ -66,7 +81,8 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
 
   useEffect(() => {
     if (latitude && longitude) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // Update position to show GPS coordinates on map
+      setPosition([latitude, longitude]);
       handleGeocode(latitude, longitude);
     }
   }, [latitude, longitude, handleGeocode]);
@@ -85,11 +101,13 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
           zoom={DEFAULT_ZOOM}
           className="h-full w-full"
           scrollWheelZoom={false}
+          key={mapKeyRef.current}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapViewUpdater position={position} zoom={DEFAULT_ZOOM} />
           <DraggableMarker position={position} onMove={handleMarkerMove} />
         </MapContainer>
 
@@ -109,6 +127,11 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
         <p className="flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="h-3.5 w-3.5" />
           {areaName}
+        </p>
+      )}
+      {accuracy && (
+        <p className="text-xs text-muted-foreground">
+          Accuracy: ±{Math.round(accuracy)} m
         </p>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}

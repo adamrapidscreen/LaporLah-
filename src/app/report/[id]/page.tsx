@@ -1,18 +1,25 @@
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-import { Check, ChevronLeft, MoreHorizontal, MapPin, Eye, Flag, Send } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { Check, ChevronLeft, MapPin, Eye, Flag, Send, MessageCircle } from 'lucide-react';
+
+export const revalidate = 15; // Revalidate every 15 seconds (more dynamic)
 
 import { CommentForm } from '@/components/comments/comment-form';
 import { CommentList } from '@/components/comments/comment-list';
 import { VotePanel } from '@/components/confirmation/vote-panel';
 import { LocationDisplayWrapper } from '@/components/map/location-display-wrapper';
 import { CategoryTag } from '@/components/reports/category-tag';
+import { ReportActionsMenu } from '@/components/reports/report-actions-menu';
+import { ReportViewers } from '@/components/reports/report-viewers';
+import { ShareButton } from '@/components/reports/share-button';
 import { StatusStepper } from '@/components/reports/status-stepper';
 import { StatusUpdate } from '@/components/reports/status-update';
-import { FollowButton } from '@/components/shared/follow-button';
+import { EmptyState } from '@/components/shared/empty-state';
 import { FlagButton } from '@/components/shared/flag-button';
+import { FollowButton } from '@/components/shared/follow-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +27,6 @@ import { CATEGORIES } from '@/lib/constants/categories';
 import { STATUS_FLOW, statusConfig } from '@/lib/constants/statuses';
 import { createClient } from '@/lib/supabase/server';
 import type { Report } from '@/lib/types';
-import { formatDistanceToNow } from 'date-fns';
-import { EmptyState } from '@/components/shared/empty-state';
 
 interface ReportDetailPageProps {
   params: Promise<{ id: string }>;
@@ -31,97 +36,117 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: report } = await supabase
-    .from('reports')
-    .select(`
-      *,
-      creator:users!user_id (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
-    .eq('id', id)
-    .eq('is_hidden', false)
-    .single();
+  // Round 1: Parallel fetch of report, user, comments count, and follow count
+  const [reportResult, userResult, commentsCountResult, followCountResult] = await Promise.all([
+    supabase
+      .from('reports')
+      .select(`
+        *,
+        creator:users!user_id (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('id', id)
+      .eq('is_hidden', false)
+      .single(),
+    supabase.auth.getUser(),
+    supabase
+      .from('comments')
+      .select('*', { count: 'exact', head: true })
+      .eq('report_id', id),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('report_id', id),
+  ]);
 
+  const report = reportResult.data;
   if (!report) {
     notFound();
   }
 
   const typedReport = report as Report;
-
-  // Get current user for auth checks
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = userResult.data?.user;
   const isAuthenticated = !!user;
   const isCreatorOrAdmin = user?.id === typedReport.user_id; // TODO: add admin check
+  const commentsCount = commentsCountResult.count;
+  const followCount = followCountResult.count ?? 0;
 
   const currentStatusIndex = STATUS_FLOW.indexOf(typedReport.status);
   const nextStatusValue = STATUS_FLOW[currentStatusIndex + 1];
   const nextStatusLabel = nextStatusValue ? statusConfig[nextStatusValue].labelEn : null;
 
-  // Fetch follow state for current user
+  // Round 2: Conditional parallel queries based on user and report status
   let isFollowed = false;
-  let followCount = 0;
-
-  const { count: commentsCount } = await supabase
-    .from('comments')
-    .select('*', { count: 'exact', head: true })
-    .eq('report_id', id);
-
-  if (user) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: follow } = await (supabase as any)
-      .from('follows')
-      .select('id')
-      .eq('report_id', id)
-      .eq('user_id', user.id)
-      .maybeSingle();
-    isFollowed = !!follow;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count } = await (supabase as any)
-    .from('follows')
-    .select('*', { count: 'exact', head: true })
-    .eq('report_id', id);
-
-  followCount = count ?? 0;
-
-  // Fetch confirmations for vote panel
   let confirmedCount = 0;
   let notYetCount = 0;
   let userVote: 'confirmed' | 'not_yet' | null = null;
 
+  // Build conditional queries for Round 2
+  const round2Queries: Promise<unknown>[] = [];
+  const round2Keys: string[] = [];
+
+  if (user) {
+    round2Keys.push('followCheck');
+    round2Queries.push(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from('follows')
+        .select('id')
+        .eq('report_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle()
+    );
+  }
+
   if (typedReport.status === 'resolved') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: confirmations } = await (supabase as any)
-      .from('confirmations')
-      .select('vote, user_id')
-      .eq('report_id', id);
+    round2Keys.push('confirmations');
+    round2Queries.push(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from('confirmations')
+        .select('vote, user_id')
+        .eq('report_id', id)
+    );
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    confirmedCount = confirmations?.filter((c: any) => c.vote === 'confirmed').length ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    notYetCount = confirmations?.filter((c: any) => c.vote === 'not_yet').length ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userVote = confirmations?.find((c: any) => c.user_id === user?.id)?.vote ?? null;
+  if (round2Queries.length > 0) {
+    const round2Results = await Promise.all(round2Queries);
 
-    // Check timeout on page load
-    if (typedReport.resolved_at) {
-      const hoursElapsed = (Date.now() - new Date(typedReport.resolved_at).getTime()) / (1000 * 60 * 60);
-      if (hoursElapsed >= 72) {
-        const { checkResolution } = await import('@/lib/actions/votes');
-        await checkResolution(typedReport.id);
-        // Re-fetch report after potential state change
-        const { data: updatedReport } = await supabase
-          .from('reports')
-          .select('*')
-          .eq('id', id)
-          .single();
-        if (updatedReport) {
-          Object.assign(typedReport, updatedReport);
-        }
+    round2Keys.forEach((key, index) => {
+      const result = round2Results[index] as { data: unknown };
+      if (key === 'followCheck') {
+        isFollowed = !!result.data;
+      } else if (key === 'confirmations') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const confirmations = result.data as any[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        confirmedCount = confirmations?.filter((c: any) => c.vote === 'confirmed').length ?? 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        notYetCount = confirmations?.filter((c: any) => c.vote === 'not_yet').length ?? 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        userVote = confirmations?.find((c: any) => c.user_id === user?.id)?.vote ?? null;
+      }
+    });
+  }
+
+  // Check resolution timeout (must run after confirmations data is available)
+  if (typedReport.status === 'resolved' && typedReport.resolved_at) {
+    const hoursElapsed = (Date.now() - new Date(typedReport.resolved_at).getTime()) / (1000 * 60 * 60);
+    if (hoursElapsed >= 72) {
+      const { checkResolution } = await import('@/lib/actions/votes');
+      await checkResolution(typedReport.id);
+      // Re-fetch report after potential state change
+      const { data: updatedReport } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (updatedReport) {
+        Object.assign(typedReport, updatedReport);
       }
     }
   }
@@ -138,14 +163,16 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           <ChevronLeft className="h-4 w-4" />
           Back
         </Link>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <ReportActionsMenu
+          reportId={typedReport.id}
+          title={typedReport.title}
+          description={typedReport.description}
+        />
       </div>
 
       {/* Photo section */}
       {typedReport.photo_url ? (
-        <div className="relative w-full overflow-hidden max-h-[300px]">
+        <div className="relative w-full aspect-video overflow-hidden max-h-[300px]">
           <Image
             src={typedReport.photo_url}
             alt={typedReport.title}
@@ -172,7 +199,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         {/* Title */}
         <h1 className="text-xl font-bold text-foreground mt-3">{typedReport.title}</h1>
 
-        {/* Description */}
+        <ReportViewers reportId={typedReport.id} />
         <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{typedReport.description}</p>
 
         {/* Section divider: "Status Progress" */}
@@ -256,12 +283,17 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
 
         {/* Engagement stats */}
         <div className="flex gap-4 mt-3">
-          <span className="text-xs text-muted-foreground">👁 {followCount} {followCount === 1 ? 'follower' : 'followers'}</span>
-          <span className="text-xs text-muted-foreground">💬 {commentsCount ?? 0} {commentsCount === 1 ? 'comment' : 'comments'}</span>
+          <span className="text-xs text-muted-foreground"><Eye className="inline h-3.5 w-3.5" /> {followCount} {followCount === 1 ? 'follower' : 'followers'}</span>
+          <span className="text-xs text-muted-foreground"><MessageCircle className="inline h-3.5 w-3.5" /> {commentsCount ?? 0} {commentsCount === 1 ? 'comment' : 'comments'}</span>
         </div>
 
         {/* Action buttons */}
         <div className="flex gap-2 mt-4">
+          <ShareButton
+            title={typedReport.title}
+            description={typedReport.description}
+            reportId={typedReport.id}
+          />
           <div className="flex-1">
             <FollowButton
               reportId={typedReport.id}
@@ -283,7 +315,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         {/* Comments section */}
         {(commentsCount ?? 0) === 0 ? (
           <EmptyState
-            emoji="💬"
+          icon={<MessageCircle className="h-16 w-16" />}
             title="No comments yet"
             subtitle="Be the first to comment"
           />

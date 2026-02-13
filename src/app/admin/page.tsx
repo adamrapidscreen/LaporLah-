@@ -3,6 +3,8 @@ import { FileText, AlertTriangle, Clock, CheckCircle, XCircle, Flag } from 'luci
 import { StatCard } from '@/components/admin/stat-card';
 import { getAdminStats } from '@/lib/actions/admin';
 
+export const revalidate = 30; // Revalidate every 30 seconds
+
 export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 

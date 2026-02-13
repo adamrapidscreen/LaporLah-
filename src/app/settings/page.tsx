@@ -2,13 +2,15 @@ import { redirect } from 'next/navigation';
 
 import { Calendar } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DisplayNameEditor } from '@/components/settings/display-name-editor';
+import { SignOutButton } from '@/components/settings/sign-out-button';
 import { ThemeSelector } from '@/components/settings/theme-selector';
 import { UpdateChecker } from '@/components/settings/update-checker';
-import { SignOutButton } from '@/components/settings/sign-out-button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/types/database';
+
+export const revalidate = 0; // Always fresh — user-specific settings
 
 export const metadata = {
   title: 'Settings · LaporLah',

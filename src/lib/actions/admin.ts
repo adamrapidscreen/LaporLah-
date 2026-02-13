@@ -148,35 +148,33 @@ export async function getAdminStats(): Promise<AdminStats> {
   const { error: authError, supabase } = await requireAdmin();
   if (authError || !supabase) throw new Error(authError ?? 'Unauthorized');
 
-  const { count: totalReports } = await supabase
-    .from('reports').select('*', { count: 'exact', head: true });
-
-  const { count: open } = await supabase
-    .from('reports').select('*', { count: 'exact', head: true }).eq('status', 'open');
-
-  const { count: acknowledged } = await supabase
-    .from('reports').select('*', { count: 'exact', head: true }).eq('status', 'acknowledged');
-
-  const { count: inProgress } = await supabase
-    .from('reports').select('*', { count: 'exact', head: true }).eq('status', 'in_progress');
-
-  const { count: resolved } = await supabase
-    .from('reports').select('*', { count: 'exact', head: true }).eq('status', 'resolved');
-
-  const { count: closed } = await supabase
-    .from('reports').select('*', { count: 'exact', head: true }).eq('status', 'closed');
-
-  const { count: flaggedCount } = await supabase
-    .from('flags').select('*', { count: 'exact', head: true });
+  // Parallel fetch all stats for better performance
+  const [
+    totalReportsResult,
+    openResult,
+    acknowledgedResult,
+    inProgressResult,
+    resolvedResult,
+    closedResult,
+    flaggedCountResult,
+  ] = await Promise.all([
+    supabase.from('reports').select('*', { count: 'exact', head: true }),
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'acknowledged'),
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'in_progress'),
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'resolved'),
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'closed'),
+    supabase.from('flags').select('*', { count: 'exact', head: true }),
+  ]);
 
   return {
-    totalReports: totalReports ?? 0,
-    open: open ?? 0,
-    acknowledged: acknowledged ?? 0,
-    inProgress: inProgress ?? 0,
-    resolved: resolved ?? 0,
-    closed: closed ?? 0,
-    flaggedCount: flaggedCount ?? 0,
+    totalReports: totalReportsResult.count ?? 0,
+    open: openResult.count ?? 0,
+    acknowledged: acknowledgedResult.count ?? 0,
+    inProgress: inProgressResult.count ?? 0,
+    resolved: resolvedResult.count ?? 0,
+    closed: closedResult.count ?? 0,
+    flaggedCount: flaggedCountResult.count ?? 0,
   };
 }
 
@@ -222,7 +220,8 @@ export async function getFlaggedItems(): Promise<FlaggedItem[]> {
       report:reports(id, title, is_hidden, comments_locked)
     `)
     .not('report_id', 'is', null)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   const { data: commentFlagsData } = await supabase
     .from('flags')
@@ -234,7 +233,8 @@ export async function getFlaggedItems(): Promise<FlaggedItem[]> {
       comment:comments(id, content, report_id)
     `)
     .not('comment_id', 'is', null)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   const items: FlaggedItem[] = [];
 

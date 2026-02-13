@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { LogOut, Plus, User, Settings2 } from 'lucide-react';
+import { Bell, LogOut, Plus, User, Settings2 } from 'lucide-react';
 
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -46,9 +46,8 @@ export function TopNav({ userId, initialUnreadCount = 0 }: TopNavProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/50 backdrop-blur-xl bg-background/80">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-          <span className="text-primary">Lapor</span>
-          <span>Lah!</span>
+        <Link href="/feed" className="flex items-center gap-0 font-bold text-lg">
+          <span className="text-primary">Lapor</span><span>Lah!</span>
         </Link>
 
         {/* Center Nav */}
@@ -82,11 +81,15 @@ export function TopNav({ userId, initialUnreadCount = 0 }: TopNavProps) {
           </Button>
           <ThemeToggle />
           {userId ? (
-            <NotificationBell userId={userId} initialUnreadCount={initialUnreadCount} />
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/notifications" aria-label="Notifications">
+                <NotificationBell userId={userId} initialUnreadCount={initialUnreadCount} />
+              </Link>
+            </Button>
           ) : (
             <Button variant="ghost" size="icon" asChild>
-              <Link href="/notifications">
-                <Plus className="h-5 w-5" />
+              <Link href="/notifications" aria-label="Notifications">
+                <Bell className="h-5 w-5" />
               </Link>
             </Button>
           )}

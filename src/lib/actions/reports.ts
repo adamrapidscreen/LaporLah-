@@ -164,31 +164,35 @@ export async function updateReportStatus(reportId: string, newStatus: ReportStat
 
   if (error) return { error: 'Failed to update status' };
 
-  // Side effect: Notify followers
+  // Side effect: Notify followers (best-effort; don't fail the action)
   const statusLabel = statusConfig[newStatus].labelMs;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).rpc('notify_followers', {
-    p_report_id: reportId,
-    p_type: 'status_change',
-    p_message: `Status dikemaskini kepada ${statusLabel}`,
-    p_exclude_user: user.id,
-  }).catch((err: unknown) => {
-    // Log but don't fail the action
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc('notify_followers', {
+      p_report_id: reportId,
+      p_type: 'status_change',
+      p_message: `Status dikemaskini kepada ${statusLabel}`,
+      p_exclude_user: user.id,
+    });
+    if (error) console.error('Failed to notify followers:', error);
+  } catch (err) {
     console.error('Failed to notify followers:', err);
-  });
+  }
 
   // Side effect: When status becomes 'resolved', notify with confirmation request
   if (newStatus === 'resolved') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).rpc('notify_followers', {
-      p_report_id: reportId,
-      p_type: 'confirmation_request',
-      p_message: 'Adakah isu ini telah diselesaikan? Sahkan sekarang.',
-      p_exclude_user: user.id,
-    }).catch((err: unknown) => {
-      // Log but don't fail the action
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).rpc('notify_followers', {
+        p_report_id: reportId,
+        p_type: 'confirmation_request',
+        p_message: 'Adakah isu ini telah diselesaikan? Sahkan sekarang.',
+        p_exclude_user: user.id,
+      });
+      if (error) console.error('Failed to send confirmation request:', error);
+    } catch (err) {
       console.error('Failed to send confirmation request:', err);
-    });
+    }
   }
 
   revalidatePath(`/report/${reportId}`);
@@ -198,15 +202,18 @@ export async function updateReportStatus(reportId: string, newStatus: ReportStat
 export async function getCommunityStats() {
   const supabase = await createClient();
 
-  const { count: open } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("is_hidden", false);
-  const { count: in_progress } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "in_progress").eq("is_hidden", false);
-  const { count: closed } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "closed").eq("is_hidden", false);
-  const { count: resolved } = await supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "resolved").eq("is_hidden", false);
+  // Parallelize all count queries for better performance
+  const [openResult, inProgressResult, closedResult, resolvedResult] = await Promise.all([
+    supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("is_hidden", false),
+    supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "in_progress").eq("is_hidden", false),
+    supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "closed").eq("is_hidden", false),
+    supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "resolved").eq("is_hidden", false),
+  ]);
 
   return {
-    open: open || 0,
-    in_progress: in_progress || 0,
-    closed: closed || 0,
-    resolved: resolved || 0,
+    open: openResult.count || 0,
+    in_progress: inProgressResult.count || 0,
+    closed: closedResult.count || 0,
+    resolved: resolvedResult.count || 0,
   };
 }

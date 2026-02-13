@@ -7,6 +7,8 @@ import { BADGE_DEFINITIONS, type BadgeType, type BadgeTier } from '@/lib/constan
 import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/types/database';
 
+export const revalidate = 60; // Revalidate every 60 seconds
+
 export const metadata = {
   title: 'My Profile',
   description: 'View your profile, badges and activity.',
@@ -18,78 +20,63 @@ export default async function ProfilePage() {
 
   if (!authUser) redirect('/login');
 
-  // Fetch user profile
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', authUser.id)
-    .single();
+  // Parallel fetch all profile data after auth check
+  const [
+    userResult,
+    badgesResult,
+    spotterCountResult,
+    userCommentsResult,
+    userReportsResult,
+    closerCountResult,
+    reportsCountResult,
+    commentsCountResult,
+    activitiesResult,
+  ] = await Promise.all([
+    // User profile
+    supabase.from('users').select('*').eq('id', authUser.id).single(),
+    // Badges
+    supabase.from('badges').select('type, tier').eq('user_id', authUser.id),
+    // Spotter count (reports created)
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('user_id', authUser.id),
+    // User comments (for Kampung Hero calculation)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('comments').select('report_id').eq('user_id', authUser.id),
+    // User reports (for Kampung Hero calculation)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('reports').select('id').eq('user_id', authUser.id),
+    // Closer count (confirmed resolutions)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('confirmations').select('*', { count: 'exact', head: true }).eq('user_id', authUser.id).eq('vote', 'confirmed'),
+    // Reports count for stats
+    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('user_id', authUser.id),
+    // Comments count for stats
+    supabase.from('comments').select('*', { count: 'exact', head: true }).eq('user_id', authUser.id),
+    // Recent activity
+    supabase.from('point_events').select('id, action, points, created_at').eq('user_id', authUser.id).order('created_at', { ascending: false }).limit(10),
+  ]);
 
+  const user = userResult.data;
   if (!user) redirect('/login');
 
   const typedUser = user as Database['public']['Tables']['users']['Row'];
+  const badges = badgesResult.data as { type: BadgeType, tier: BadgeTier }[] | null;
+  const spotterCount = spotterCountResult.count;
+  const userComments = userCommentsResult.data;
+  const userReports = userReportsResult.data;
+  const closerCount = closerCountResult.count;
+  const reportsCount = reportsCountResult.count;
+  const commentsCount = commentsCountResult.count;
+  const activities = activitiesResult.data;
 
-  // Fetch badges
-  const { data: badges } = await supabase
-    .from('badges')
-    .select('type, tier') // Corrected: select 'type' instead of 'badge_type'
-    .eq('user_id', authUser.id) as { data: { type: BadgeType, tier: BadgeTier }[] | null };
-
-  // Fetch badge progress counts
-  // Spotter: reports created
-  const { count: spotterCount } = await supabase
-    .from('reports')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', authUser.id);
-
-  // Kampung Hero: comments on others' reports
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: userComments } = await (supabase as any)
-    .from('comments')
-    .select('report_id')
-    .eq('user_id', authUser.id);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: userReports } = await (supabase as any)
-    .from('reports')
-    .select('id')
-    .eq('user_id', authUser.id);
-
+  // Calculate Kampung Hero count (comments on others' reports)
   const userReportIds = new Set(userReports?.map((r: { id: string }) => r.id) ?? []);
   const kampungHeroCount = userComments?.filter((c: { report_id: string }) => !userReportIds.has(c.report_id)).length ?? 0;
-
-  // Closer: confirmed resolutions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count: closerCount } = await (supabase as any)
-    .from('confirmations')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', authUser.id)
-    .eq('vote', 'confirmed');
 
   const badgeCounts: Record<BadgeType, number> = {
     spotter: spotterCount ?? 0,
     kampung_hero: kampungHeroCount,
     closer: closerCount ?? 0,
   };
-
-  // Fetch stats
-  const { count: reportsCount } = await supabase
-    .from('reports')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', authUser.id);
-
-  const { count: commentsCount } = await supabase
-    .from('comments')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', authUser.id);
-
-  // Fetch recent activity (last 10 point events)
-  const { data: activities } = await supabase
-    .from('point_events')
-    .select('id, action, points, created_at') // Select specific fields
-    .eq('user_id', authUser.id)
-    .order('created_at', { ascending: false })
-    .limit(10);
 
   return (
     <div className="space-y-6 p-4 max-w-lg mx-auto pb-24">

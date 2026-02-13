@@ -1,12 +1,14 @@
+import { FileEdit, MessageCircle, Users, CheckCircle, PartyPopper, Trophy, Circle, Minus } from 'lucide-react';
+
 import { cn, formatRelativeTime } from '@/lib/utils'; // Import the utility
 
-const ACTION_LABELS: Record<string, { emoji: string; label: string }> = {
-  create_report: { emoji: '📝', label: 'Mencipta laporan' },
-  comment: { emoji: '💬', label: 'Memberi komen' },
-  new_follower: { emoji: '👥', label: 'Pengikut baharu' },
-  confirmation_vote: { emoji: '✅', label: 'Undi pengesahan' },
-  report_closed: { emoji: '🎉', label: 'Laporan ditutup' },
-  resolution_confirmed: { emoji: '🏆', label: 'Penyelesaian disahkan' },
+const ACTION_LABELS: Record<string, { icon: React.ElementType; label: string }> = {
+  create_report: { icon: FileEdit, label: 'Mencipta laporan' },
+  comment: { icon: MessageCircle, label: 'Memberi komen' },
+  new_follower: { icon: Users, label: 'Pengikut baharu' },
+  confirmation_vote: { icon: CheckCircle, label: 'Undi pengesahan' },
+  report_closed: { icon: PartyPopper, label: 'Laporan ditutup' },
+  resolution_confirmed: { icon: Trophy, label: 'Penyelesaian disahkan' },
 };
 
 interface Activity {
@@ -32,12 +34,14 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   return (
     <div className="space-y-3">
       {activities.map((activity) => {
-        const config = ACTION_LABELS[activity.action] ?? { emoji: '•', label: activity.action };
+        const config = ACTION_LABELS[activity.action] ?? { icon: Circle, label: activity.action };
         const timeAgo = formatRelativeTime(activity.created_at); // Use the function
+
+        const IconComponent = config.icon;
 
         return (
           <div key={activity.id} className="flex items-center gap-3 text-sm">
-            <span className="text-lg">{config.emoji}</span>
+            <IconComponent className="h-5 w-5 text-muted-foreground" />
             <div className="flex-1 min-w-0">
               <p className="truncate">{config.label}</p>
               <p className="text-xs text-muted-foreground">{timeAgo}</p>

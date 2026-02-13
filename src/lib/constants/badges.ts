@@ -2,6 +2,7 @@ export const BADGE_DEFINITIONS = {
   spotter: {
     name: 'Spotter',
     emoji: '🔦',
+    icon: 'lightbulb',
     description: 'Pelapor aktif komuniti',
     flair: {
       bronze: 'Pemerhati Baru',
@@ -18,6 +19,7 @@ export const BADGE_DEFINITIONS = {
   kampung_hero: {
     name: 'Kampung Hero',
     emoji: '🤝',
+    icon: 'handshake',
     description: 'Pembantu komuniti',
     flair: {
       bronze: 'Jiran Prihatin',
@@ -34,6 +36,7 @@ export const BADGE_DEFINITIONS = {
   closer: {
     name: 'Closer',
     emoji: '✅',
+    icon: 'check-circle',
     description: 'Penyelesai isu',
     flair: {
       bronze: 'Penyelesai Baru',

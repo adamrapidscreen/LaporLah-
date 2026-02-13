@@ -33,26 +33,23 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
   });
 
   return (
-    <div
+    <span
       className={cn(
-        'relative flex flex-col items-center justify-center gap-0.5 text-xs transition-colors',
+        'relative inline-flex items-center justify-center transition-colors',
         isActive ? 'text-primary' : 'text-muted-foreground'
       )}
     >
-      <span className="relative">
-        <Bell
-          className={cn(
-            'h-5 w-5',
-            shake && 'animate-shake'
-          )}
-        />
-        {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
+      <Bell
+        className={cn(
+          'h-5 w-5',
+          shake && 'animate-shake'
         )}
-      </span>
-      <span>Notifications</span>
-    </div>
+      />
+      {unreadCount > 0 && (
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+          {unreadCount > 99 ? '99+' : unreadCount}
+        </span>
+      )}
+    </span>
   );
 }

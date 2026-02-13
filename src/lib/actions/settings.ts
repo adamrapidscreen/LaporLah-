@@ -38,7 +38,8 @@ export async function updateDisplayName(formData: FormData) {
     return { error: 'Gagal mengemas kini nama / Failed to update name' };
   }
 
-  // 4. Revalidate paths
+  // 4. Revalidate paths so display name updates everywhere
+  revalidatePath('/');
   revalidatePath('/settings');
   revalidatePath('/profile');
 

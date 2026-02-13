@@ -1,9 +1,11 @@
 'use client';
 
+import { Fragment } from 'react';
+
 import { Check } from 'lucide-react';
+
 import { STATUS_FLOW, statusConfig, getStatusIndex, type ReportStatus } from '@/lib/constants/statuses';
 import { cn } from '@/lib/utils';
-import { Fragment } from 'react';
 
 interface StatusStepperProps {
   currentStatus: ReportStatus;

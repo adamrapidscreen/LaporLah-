@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ClientGreetingProps {
   userName: string | null;
@@ -18,7 +18,7 @@ export function ClientGreeting({ userName }: ClientGreetingProps) {
     };
 
     const baseGreeting = getGreeting();
-    setGreeting(userName ? `${baseGreeting}, ${userName} 👋` : `Selamat Datang ke LaporLah 👋`);
+    setGreeting(userName ? `${baseGreeting}, ${userName}` : `Selamat Datang ke LaporLah`);
   }, [userName]);
 
   return <h1 className="text-xl font-bold text-foreground">{greeting}</h1>;

@@ -1,10 +1,14 @@
 import { redirect } from 'next/navigation';
 
+import { Bell } from 'lucide-react';
+
 import { NotificationItem } from '@/components/notifications/notification-item';
-import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/shared/empty-state';
+import { Button } from '@/components/ui/button';
 import { markAllAsRead } from '@/lib/actions/notifications';
 import { createClient } from '@/lib/supabase/server';
+
+export const revalidate = 10; // Revalidate every 10 seconds (near-realtime)
 
 export default async function NotificationsPage() {
   const supabase = await createClient();
@@ -14,9 +18,10 @@ export default async function NotificationsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: notifications } = await (supabase as any)
     .from('notifications')
-    .select('*')
+    .select('id, type, message, report_id, is_read, created_at')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   const hasUnread = notifications?.some((n: { is_read: boolean }) => !n.is_read);
 
@@ -35,7 +40,7 @@ export default async function NotificationsPage() {
 
       {!notifications || notifications.length === 0 ? (
         <EmptyState
-          emoji="🔔"
+          icon={<Bell className="h-16 w-16" />}
           title="No notifications"
           subtitle="You're all caught up!"
         />

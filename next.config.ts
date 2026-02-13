@@ -13,17 +13,31 @@ const supabaseHostname = supabaseUrl ? new URL(supabaseUrl).hostname : undefined
 
 const nextConfig: NextConfig = {
   turbopack: {},
-  images: supabaseHostname
-    ? {
-        remotePatterns: [
-          {
-            protocol: "https",
-            hostname: supabaseHostname,
-            pathname: "/storage/v1/object/public/**",
-          },
-        ],
-      }
-    : undefined,
+  images: {
+    remotePatterns: [
+      // Specific Supabase project storage (from env)
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: supabaseHostname,
+              pathname: "/storage/v1/object/public/**",
+            },
+          ]
+        : []),
+      // Wildcard for any Supabase storage
+      {
+        protocol: "https" as const,
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      // Google OAuth avatars
+      {
+        protocol: "https" as const,
+        hostname: "lh3.googleusercontent.com",
+      },
+    ],
+  },
 };
 
 export default withSerwist(nextConfig);

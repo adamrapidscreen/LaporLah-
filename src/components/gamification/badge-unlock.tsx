@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react';
 
+import { Trophy, Lightbulb, Handshake, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { BADGE_DEFINITIONS, TIER_COLORS, type BadgeType, type BadgeTier } from '@/lib/constants/badges';
 import { cn } from '@/lib/utils';
+
+const BADGE_ICONS: Record<string, React.ElementType> = {
+  lightbulb: Lightbulb,
+  handshake: Handshake,
+  'check-circle': CheckCircle,
+};
 
 interface BadgeUnlockProps {
   badgeType: BadgeType;
@@ -16,6 +23,7 @@ interface BadgeUnlockProps {
 export function BadgeUnlock({ badgeType, tier, onDismiss }: BadgeUnlockProps) {
   const [isVisible, setIsVisible] = useState(false);
   const badge = BADGE_DEFINITIONS[badgeType];
+  const IconComponent = BADGE_ICONS[badge.icon] ?? Lightbulb;
   const tierColor = TIER_COLORS[tier];
   const flair = badge.flair[tier];
 
@@ -24,7 +32,9 @@ export function BadgeUnlock({ badgeType, tier, onDismiss }: BadgeUnlockProps) {
     requestAnimationFrame(() => setIsVisible(true));
 
     // Show toast notification
-    toast.success(`🏆 Tahniah! Anda dapat lencana: ${badge.name}`);
+    toast.success(`Tahniah! Anda dapat lencana: ${badge.name}`, {
+      icon: <Trophy className="h-4 w-4" />,
+    });
 
     // Auto-dismiss after 5 seconds
     const timeout = setTimeout(() => {
@@ -61,7 +71,7 @@ export function BadgeUnlock({ badgeType, tier, onDismiss }: BadgeUnlockProps) {
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Lencana Baharu!
         </p>
-        <span className="text-5xl animate-bounce-once">{badge.emoji}</span>
+        <IconComponent className="h-12 w-12 animate-bounce-once" />
         <div>
           <p className="text-lg font-bold">{badge.name}</p>
           <p className={cn('text-sm font-medium uppercase', tierColor.text)}>{tier}</p>

@@ -161,6 +161,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 .leaflet-container {
@@ -219,3 +222,23 @@
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-delay-150 { animation-delay: 150ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-450 { animation-delay: 450ms; }

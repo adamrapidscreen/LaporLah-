@@ -1,13 +1,14 @@
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useRef } from 'react';
 
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation'; // Import useRouter
+
 import { toast } from 'sonner';
 
 import { BadgeUnlock } from '@/components/gamification/badge-unlock'; // Import component
-import { PhotoUpload } from '@/components/reports/photo-upload';
+import { PhotoUpload, type PhotoUploadRef } from '@/components/reports/photo-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -39,6 +40,7 @@ interface SelectedLocation {
 export function ReportForm({}: ReportFormProps) {
   const router = useRouter(); // Initialize useRouter
   const { badge, showBadgeUnlock, dismissBadgeUnlock } = useBadgeUnlock(); // Initialize useBadgeUnlock
+  const photoUploadRef = useRef<PhotoUploadRef>(null);
 
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(createReport, {
     error: null,
@@ -48,6 +50,53 @@ export function ReportForm({}: ReportFormProps) {
   const [category, setCategory] = useState<string>('');
   const [photoUrl, setPhotoUrl] = useState<string>('');
   const [location, setLocation] = useState<SelectedLocation | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    // Only run once on mount if shared content detected
+    if (params.get('shared') !== '1') return;
+
+    // Pre-fill title from share intent
+    const sharedTitle = params.get('title');
+    if (sharedTitle) {
+      const titleInput = document.querySelector('input[name="title"]') as HTMLInputElement;
+      if (titleInput) titleInput.value = sharedTitle;
+    }
+
+    // Pre-fill description
+    const sharedDescription = params.get('description');
+    if (sharedDescription) {
+      const descInput = document.querySelector('textarea[name="description"]') as HTMLTextAreaElement;
+      if (descInput) descInput.value = sharedDescription;
+    }
+
+    // Retrieve and set shared photo
+    (async () => {
+      try {
+        const cache = await caches.open('share-target-temp');
+        const response = await cache.match('/shared-photo');
+
+        if (response) {
+          const blob = await response.blob();
+          const fileName = response.headers.get('X-File-Name') || 'shared-photo.jpg';
+          const file = new File([blob], fileName, { type: blob.type });
+
+          // Trigger PhotoUpload with the file
+          if (photoUploadRef.current) {
+            await photoUploadRef.current.handleFile(file);
+          }
+
+          // Clean up cache
+          await cache.delete('/shared-photo');
+
+          toast.success('Photo loaded from share');
+        }
+      } catch (err) {
+        console.error('Failed to retrieve shared photo:', err);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (state.error) {
@@ -136,6 +185,7 @@ export function ReportForm({}: ReportFormProps) {
 
         {/* Photo Upload */}
         <PhotoUpload
+          ref={photoUploadRef}
           onUpload={setPhotoUrl}
           onRemove={() => setPhotoUrl('')}
         />

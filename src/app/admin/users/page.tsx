@@ -1,6 +1,8 @@
 import { UserRow } from '@/components/admin/user-row';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const revalidate = 30; // Revalidate every 30 seconds
+
 interface UserWithCounts {
   id: string;
   email: string;
@@ -29,39 +31,36 @@ export default async function UsersPage() {
   // Query users with report and flag counts
   // Note: We use a workaround for counts since nested count queries can be unreliable
   // Instead, we fetch all users first, then calculate counts in a separate query
-  let { data: users, error } = await supabase
+  const { data: users, error } = await supabase
     .from('users')
     .select('id, email, full_name, avatar_url, role, is_banned')
     .order('is_banned', { ascending: false })
-    .order('full_name');
+    .order('full_name')
+    .limit(50);
 
-  // If users loaded successfully, fetch counts separately
-  let reportCounts: Record<string, number> = {};
-  let flagCounts: Record<string, number> = {};
+  // If users loaded successfully, fetch counts in parallel
+  const reportCounts: Record<string, number> = {};
+  const flagCounts: Record<string, number> = {};
 
   if (users && !error) {
     const userIds = users.map((u) => u.id);
 
-    // Fetch report counts
-    const { data: reportData } = await supabase
-      .from('reports')
-      .select('user_id', { count: 'exact' })
-      .in('user_id', userIds);
+    // Parallel fetch report and flag counts
+    const [reportDataResult, flagDataResult] = await Promise.all([
+      supabase.from('reports').select('user_id', { count: 'exact' }).in('user_id', userIds),
+      supabase.from('flags').select('user_id', { count: 'exact' }).in('user_id', userIds),
+    ]);
 
-    if (reportData) {
-      reportData.forEach((report: any) => {
+    if (reportDataResult.data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      reportDataResult.data.forEach((report: any) => {
         reportCounts[report.user_id] = (reportCounts[report.user_id] || 0) + 1;
       });
     }
 
-    // Fetch flag counts
-    const { data: flagData } = await supabase
-      .from('flags')
-      .select('user_id', { count: 'exact' })
-      .in('user_id', userIds);
-
-    if (flagData) {
-      flagData.forEach((flag: any) => {
+    if (flagDataResult.data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      flagDataResult.data.forEach((flag: any) => {
         flagCounts[flag.user_id] = (flagCounts[flag.user_id] || 0) + 1;
       });
     }
@@ -72,6 +71,7 @@ export default async function UsersPage() {
     console.error('[admin/users] Failed to load users:', error);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formattedUsers: UserWithCounts[] = ((users ?? []) as any[]).map((u) => ({
     id: u.id,
     email: u.email,

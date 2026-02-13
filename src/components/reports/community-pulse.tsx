@@ -1,6 +1,7 @@
 // src/components/reports/community-pulse.tsx
 
 import Link from 'next/link';
+
 import { getCommunityStats } from '@/lib/actions/reports';
 import { cn } from '@/lib/utils';
 
@@ -15,20 +16,31 @@ function StatCard({ title, count, status, color }: StatCardProps) {
   return (
     <Link
       href={`/?status=${status}`}
-      className="bg-card border border-border rounded-xl p-2 cursor-pointer hover:card-glow transition flex flex-col items-center justify-center"
-      style={{ borderLeftColor: `rgba(var(--${color}), 0.3)` }}
+      className="bg-secondary/40 hover:bg-secondary/60 rounded-xl p-2 cursor-pointer transition flex flex-col items-center justify-center gap-0.5"
     >
-      <div className="flex items-center gap-1">
-        <div className={cn("w-1.5 h-1.5 rounded-full", color)} />
+      <div className="flex items-center gap-1.5">
+        <div className={cn("w-2 h-2 rounded-full", color)} />
         <span className="font-mono text-lg font-bold text-foreground">{count}</span>
       </div>
-      <span className="text-[10px] text-muted-foreground leading-tight text-center whitespace-nowrap">{title}</span>
+      <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center whitespace-nowrap">{title}</span>
     </Link>
   );
 }
 
-export async function CommunityPulse() {
-  const stats = await getCommunityStats();
+export interface CommunityStats {
+  open: number;
+  in_progress: number;
+  closed: number;
+  resolved: number;
+}
+
+interface CommunityPulseProps {
+  stats?: CommunityStats;
+}
+
+export async function CommunityPulse({ stats: propStats }: CommunityPulseProps = {}) {
+  // If stats are provided as prop, use them directly (avoids duplicate fetch)
+  const stats = propStats ?? await getCommunityStats();
 
   const statData = [
     { title: 'Open', count: stats.open, status: 'open', color: 'bg-blue-500' },

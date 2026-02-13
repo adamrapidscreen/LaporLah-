@@ -33,18 +33,18 @@ export function CivicCard({ user, stats }: CivicCardProps) {
   });
 
   return (
-    <Card className="relative overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+    <Card className="bg-gradient-to-br from-card/80 to-background border border-white/10 shadow-xl backdrop-blur-md relative overflow-hidden group">
+      <span className="absolute top-4 right-4 text-xs font-medium text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full">Ahli sejak {joinDate}</span>
       <div className="p-6 flex flex-col items-center gap-4">
         {/* Avatar */}
-        <Avatar className="h-16 w-16 ring-2 ring-primary/30">
+        <Avatar className="h-20 w-20 ring-4 ring-primary/50 shadow-md shadow-primary/30">
           <AvatarImage src={user.avatar_url ?? undefined} alt={user.full_name} className="object-cover" />
           <AvatarFallback className="text-lg font-semibold text-muted-foreground">{initials}</AvatarFallback>
         </Avatar>
 
-        {/* Name + join date */}
+        {/* Name */}
         <div className="text-center">
-          <h1 className="text-xl font-bold">{user.full_name}</h1>
-          <p className="text-sm text-muted-foreground">Ahli sejak {joinDate}</p>
+          <h1 className="text-2xl font-extrabold">{user.full_name}</h1>
         </div>
 
         {/* Streak */}
