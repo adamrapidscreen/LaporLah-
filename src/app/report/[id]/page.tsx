@@ -1,9 +1,8 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { formatDistanceToNow } from 'date-fns';
-import { ChevronLeft, MapPin, Eye, MessageCircle } from 'lucide-react';
+import { MapPin, Eye, MessageCircle } from 'lucide-react';
 
 export const revalidate = 15; // Revalidate every 15 seconds (more dynamic)
 
@@ -17,6 +16,7 @@ import { ReportViewers } from '@/components/reports/report-viewers';
 import { ShareButton } from '@/components/reports/share-button';
 import { StatusStepper } from '@/components/reports/status-stepper';
 import { StatusUpdate } from '@/components/reports/status-update';
+import { BackButton } from '@/components/shared/back-button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { FlagButton } from '@/components/shared/flag-button';
 import { FollowButton } from '@/components/shared/follow-button';
@@ -157,10 +157,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     <div className="mx-auto max-w-2xl">
       {/* Top navigation bar */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="h-4 w-4" />
-          Back
-        </Link>
+        <BackButton />
         <ReportActionsMenu
           reportId={typedReport.id}
           title={typedReport.title}
