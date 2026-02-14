@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 interface ClientGreetingProps {
   userName: string | null;
 }
@@ -12,7 +14,12 @@ function getGreeting() {
 }
 
 export function ClientGreeting({ userName }: ClientGreetingProps) {
-  const baseGreeting = getGreeting();
+  const [timeGreeting, setTimeGreeting] = useState('');
+  useEffect(() => {
+    setTimeGreeting(getGreeting());
+  }, []);
+
+  const baseGreeting = timeGreeting || 'Selamat Datang';
   const greeting = userName ? `${baseGreeting},` : 'Selamat Datang ke';
 
   return (

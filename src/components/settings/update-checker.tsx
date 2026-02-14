@@ -31,6 +31,12 @@ export function UpdateChecker() {
         return;
       }
 
+      const swOk = await fetch('/sw.js', { method: 'HEAD' }).then((r) => r.ok);
+      if (!swOk) {
+        notAvailableToast();
+        return;
+      }
+
       let registration: ServiceWorkerRegistration | undefined;
       try {
         registration = await navigator.serviceWorker.register('/sw.js');
@@ -61,7 +67,9 @@ export function UpdateChecker() {
       toast.error('Gagal memeriksa kemaskini', {
         description: 'Failed to check for updates',
       });
-      console.error('Update check failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Update check failed:', error);
+      }
     } finally {
       setIsChecking(false);
     }

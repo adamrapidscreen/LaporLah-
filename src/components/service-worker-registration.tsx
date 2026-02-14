@@ -9,17 +9,20 @@ export function ServiceWorkerRegistration() {
       'serviceWorker' in navigator &&
       process.env.NODE_ENV === 'production'
     ) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('[SW] Service worker registered:', registration);
-
-          // Listen for updates
+      const registerSw = async () => {
+        try {
+          const ok = await fetch('/sw.js', { method: 'HEAD' }).then((r) => r.ok);
+          if (!ok) return;
+          const registration = await navigator.serviceWorker.register('/sw.js');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[SW] Service worker registered:', registration);
+          }
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
-              console.log('[SW] New service worker found, installing...');
-
+              if (process.env.NODE_ENV === 'development') {
+                console.log('[SW] New service worker found, installing...');
+              }
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('[SW] New content is available; please refresh.');
@@ -27,10 +30,13 @@ export function ServiceWorkerRegistration() {
               });
             }
           });
-        })
-        .catch((error) => {
-          console.error('[SW] Service worker registration failed:', error);
-        });
+        } catch (error) {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('[SW] Service worker registration failed:', error);
+          }
+        }
+      };
+      void registerSw();
     }
   }, []);
 
