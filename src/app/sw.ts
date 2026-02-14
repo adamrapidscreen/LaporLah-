@@ -14,7 +14,7 @@ const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
-  navigationPreload: true,
+  navigationPreload: false,
   runtimeCaching: [
     {
       matcher: ({ request }) => request.destination === 'image',
@@ -56,10 +56,16 @@ const serwist = new Serwist({
   ],
 });
 
-// Handle share target POST requests
+// Handle share target POST requests and bypass auth callback so cookies reach the server
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (self as any).addEventListener('fetch', (event: any) => {
   const url = new URL(event.request.url);
+
+  // Bypass SW for OAuth callback so the request goes straight to the network with cookies (PKCE verifier)
+  if (url.pathname === '/auth/callback') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   if (event.request.method === 'POST' && url.pathname === '/report/new') {
     event.respondWith(
