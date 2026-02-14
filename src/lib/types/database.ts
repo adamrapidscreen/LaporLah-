@@ -57,7 +57,7 @@ export type Database = {
           title: string;
           description: string;
           category: 'infrastructure' | 'cleanliness' | 'safety' | 'facilities' | 'other';
-          status: 'open' | 'acknowledged' | 'in_progress' | 'resolved' | 'closed';
+          status: 'open' | 'in_progress' | 'resolved' | 'closed';
           photo_url: string | null;
           latitude: number | null;
           longitude: number | null;
@@ -76,7 +76,7 @@ export type Database = {
           title: string;
           description: string;
           category: 'infrastructure' | 'cleanliness' | 'safety' | 'facilities' | 'other';
-          status?: 'open' | 'acknowledged' | 'in_progress' | 'resolved' | 'closed';
+          status?: 'open' | 'in_progress' | 'resolved' | 'closed';
           photo_url?: string | null;
           latitude?: number | null;
           longitude?: number | null;
@@ -95,7 +95,7 @@ export type Database = {
           title?: string;
           description?: string;
           category?: 'infrastructure' | 'cleanliness' | 'safety' | 'facilities' | 'other';
-          status?: 'open' | 'acknowledged' | 'in_progress' | 'resolved' | 'closed';
+          status?: 'open' | 'in_progress' | 'resolved' | 'closed';
           photo_url?: string | null;
           latitude?: number | null;
           longitude?: number | null;
@@ -343,7 +343,7 @@ export type Database = {
         | 'badge_earned'
         | 'report_followed';
       report_category: 'infrastructure' | 'cleanliness' | 'safety' | 'facilities' | 'other';
-      report_status: 'open' | 'acknowledged' | 'in_progress' | 'resolved' | 'closed';
+      report_status: 'open' | 'in_progress' | 'resolved' | 'closed';
       user_role: 'user' | 'admin';
       vote_type: 'confirmed' | 'not_yet';
     };

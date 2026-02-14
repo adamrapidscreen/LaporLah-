@@ -5,9 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 import { createClient } from '@/lib/supabase/server';
+import { uuidLike } from '@/lib/validations/ids';
 
 const castVoteSchema = z.object({
-  reportId: z.string().uuid(),
+  reportId: uuidLike,
   vote: z.enum(['confirmed', 'not_yet']),
 });
 

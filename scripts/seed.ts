@@ -20,12 +20,18 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { persistSession: false },
 });
 
+// Test account for testers (email/password sign-in, admin role) — document in README
+const TEST_USER_EMAIL = 'tester@laporlah.my';
+const TEST_USER_PASSWORD = 'LaporLah-Test123!';
+const TEST_USER_FULL_NAME = 'Test Admin';
+
 // User IDs will be populated after creating auth users
 const USER_IDS: Record<string, string> = {
   SITI: '',
   AHMAD: '',
   MEI_LING: '',
   RAJESH: '',
+  TESTER: '',
 };
 
 const REPORT_IDS = {
@@ -79,7 +85,34 @@ async function main() {
       console.log(`   ✓ Created ${spec.email} (ID: ${data.user.id})`);
     }
   }
-  console.log('✓ Created/verified 4 auth users\n');
+
+  // Step 0b: Create test admin user (email + password for testers)
+  console.log('🔐 Creating test admin user (email/password)...');
+  const { data: testUserData, error: testUserError } = await supabase.auth.admin.createUser({
+    email: TEST_USER_EMAIL,
+    password: TEST_USER_PASSWORD,
+    email_confirm: true,
+    user_metadata: { full_name: TEST_USER_FULL_NAME },
+  });
+  if (testUserError) {
+    if (testUserError.message.includes('already registered') || testUserError.message.includes('already exists') || testUserError.message.includes('already been registered')) {
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const existing = existingUsers?.users.find((u) => u.email === TEST_USER_EMAIL);
+      if (existing) {
+        USER_IDS.TESTER = existing.id;
+        console.log(`   Test user ${TEST_USER_EMAIL} already exists (ID: ${existing.id})`);
+      } else {
+        throw new Error(`Test user ${TEST_USER_EMAIL} exists but couldn't fetch ID`);
+      }
+    } else {
+      console.error(`❌ Failed to create test user ${TEST_USER_EMAIL}:`, testUserError);
+      throw testUserError;
+    }
+  } else {
+    USER_IDS.TESTER = testUserData.user.id;
+    console.log(`   ✓ Created test admin ${TEST_USER_EMAIL} (ID: ${testUserData.user.id})`);
+  }
+  console.log('✓ Test admin user ready\n');
 
   // Step 1: Clean existing seed data
   console.log('🧹 Cleaning existing seed data...');
@@ -144,6 +177,18 @@ async function main() {
       last_active_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
     },
+    {
+      id: USER_IDS.TESTER,
+      email: TEST_USER_EMAIL,
+      full_name: TEST_USER_FULL_NAME,
+      avatar_url: `https://ui-avatars.com/api/?name=Test+Admin&background=0ea5e9&color=fff`,
+      role: 'admin',
+      total_points: 0,
+      current_streak: 0,
+      longest_streak: 0,
+      last_active_date: new Date().toISOString().split('T')[0],
+      created_at: new Date().toISOString(),
+    },
   ];
 
   const { error: usersError } = await supabase.from('users').upsert(users, { onConflict: 'id' });
@@ -174,7 +219,7 @@ async function main() {
       title: 'Overflowing bins at Putrajaya Central Park',
       description: 'The rubbish bins near the lake view area are overflowing since yesterday. Smell very bad and got flies everywhere. Tourists also complaining. Needs urgent collection!',
       category: 'cleanliness',
-      status: 'acknowledged',
+      status: 'open',
       photo_url: '/report-photos/r2-overflowing-bins-putrajaya-central-park.jpg',
       latitude: 2.9264,
       longitude: 101.6964,
@@ -234,7 +279,7 @@ async function main() {
       title: 'Illegal dumping behind shophouses',
       description: 'Someone dumping construction waste behind the shophouses on Jalan Gasing. Got broken tiles, cement bags, and furniture. Been there for 2 weeks. Mosquitoes breeding also.',
       category: 'cleanliness',
-      status: 'acknowledged',
+      status: 'open',
       photo_url: '/report-photos/r6-illegal-dumping-behind-shophouses.jpg',
       latitude: 3.1095,
       longitude: 101.6478,
@@ -276,7 +321,7 @@ async function main() {
       title: 'Suspicious activity at abandoned building',
       description: 'The old abandoned shophouse on Jalan SS2 got people going in and out at night. Looks suspicious. Neighbors worried about safety. Maybe can check or board it up properly?',
       category: 'safety',
-      status: 'acknowledged',
+      status: 'open',
       photo_url: '/report-photos/r9-suspicious-activity-abandoned-building-ss2.jpg',
       latitude: 3.1176,
       longitude: 101.6176,
@@ -641,7 +686,7 @@ async function main() {
   // Summary
   console.log('✅ Seed complete!\n');
   console.log('📊 Summary:');
-  console.log(`   • ${users.length} demo users (1 admin, 3 regular users)`);
+  console.log(`   • ${users.length} users (2 admin including test account, 3 regular demo users)`);
   console.log(`   • ${reports.length} community reports across all categories`);
   console.log(`   • ${comments.length} realistic Malaysian English comments`);
   console.log(`   • ${follows.length} follow relationships`);
@@ -651,14 +696,18 @@ async function main() {
   console.log(`   • ${notifications.length} notifications created`);
   console.log(`   • ${flags.length} flagged items for admin dashboard`);
   console.log('\n🎉 Database ready for demo!\n');
-  console.log('📝 Demo seed users created:');
+  console.log('📝 Demo seed users (Google OAuth):');
   console.log('   Admin: siti.demo@laporlah.my (Siti Nurhaliza)');
   console.log('   User:  ahmad.demo@laporlah.my (Ahmad Faiz)');
   console.log('   User:  meiling.demo@laporlah.my (Mei Ling Tan)');
   console.log('   User:  rajesh.demo@laporlah.my (Rajesh Kumar)');
+  console.log('\n🔑 Test account (email/password, admin access — for testers):');
+  console.log(`   Email:    ${TEST_USER_EMAIL}`);
+  console.log(`   Password: ${TEST_USER_PASSWORD}`);
+  console.log('   Use "Sign in with email" on the login page. Full access including admin dashboard.');
   console.log('\n💡 Next steps:');
   console.log('   1. These are demo users with realistic data (reports, comments, badges)');
-  console.log('   2. Sign in with your own Google account to see the feed populated with seed data');
+  console.log('   2. Sign in with your own Google account, or use the test account above for full access');
   console.log('   3. To view a specific demo user profile, visit /profile/[user_id] (e.g., /profile/11111111-1111-1111-1111-111111111111 for Siti)');
 }
 

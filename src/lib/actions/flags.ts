@@ -6,8 +6,9 @@ import { z } from 'zod';
 
 import { createClient } from '@/lib/supabase/server';
 import { flagSchema } from '@/lib/validations/flags';
+import { uuidLike } from '@/lib/validations/ids';
 
-const uuidSchema = z.string().uuid();
+const uuidSchema = uuidLike;
 
 export async function flagReport(reportId: string, reason: string) {
   const reasonParsed = flagSchema.safeParse({ reason });

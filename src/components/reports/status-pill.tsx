@@ -10,10 +10,6 @@ const statusConfig: Record<ReportStatus, { label: string; className: string }> =
     label: 'Open',
     className: 'bg-[hsl(var(--status-open))]/15 text-[hsl(var(--status-open))]',
   },
-  acknowledged: {
-    label: 'Acknowledged',
-    className: 'bg-[hsl(var(--status-acknowledged))]/15 text-[hsl(var(--status-acknowledged))]',
-  },
   in_progress: {
     label: 'In Progress',
     className: 'bg-[hsl(var(--status-in-progress))]/15 text-[hsl(var(--status-in-progress))]',
@@ -28,8 +24,10 @@ const statusConfig: Record<ReportStatus, { label: string; className: string }> =
   },
 };
 
+const fallbackConfig = { label: 'Unknown', className: 'bg-muted text-muted-foreground' };
+
 export function StatusPill({ status }: StatusPillProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] ?? fallbackConfig;
   return (
     <span
       className={cn(

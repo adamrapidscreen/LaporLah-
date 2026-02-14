@@ -2,9 +2,10 @@
 
 import { useCallback } from 'react';
 
+import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
-import { SlidersHorizontal } from 'lucide-react';
+import { Bookmark, SlidersHorizontal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -52,7 +53,16 @@ export function ReportFeed({ searchStatus, searchCategory }: ReportFeedProps) {
   return (
     <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="flex flex-col gap-2 px-4 py-3">
-        <h2 className="text-base font-semibold text-foreground">Laporan Terkini</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-base font-semibold text-foreground">Laporan Terkini</h2>
+          <Link
+            href="/followed"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors min-h-[44px] min-w-[44px] justify-center md:justify-start"
+          >
+            <Bookmark className="h-4 w-4 shrink-0" />
+            <span>Followed</span>
+          </Link>
+        </div>
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
 

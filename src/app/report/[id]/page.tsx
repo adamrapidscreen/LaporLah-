@@ -69,7 +69,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   const typedReport = report as Report;
   const user = userResult.data?.user;
   const isAuthenticated = !!user;
-  const isCreatorOrAdmin = user?.id === typedReport.user_id; // TODO: add admin check
+  let isCreatorOrAdmin: boolean;
   const commentsCount = commentsCountResult.count;
   const followCount = followCountResult.count ?? 0;
 
@@ -82,6 +82,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   let confirmedCount = 0;
   let notYetCount = 0;
   let userVote: 'confirmed' | 'not_yet' | null = null;
+  let userRole: string | undefined;
 
   // Build conditional queries for Round 2
   const round2Queries: Promise<unknown>[] = [];
@@ -96,6 +97,15 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         .select('id')
         .eq('report_id', id)
         .eq('user_id', user.id)
+        .maybeSingle()
+    );
+    round2Keys.push('userRole');
+    round2Queries.push(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
         .maybeSingle()
     );
   }
@@ -118,6 +128,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
       const result = round2Results[index] as { data: unknown };
       if (key === 'followCheck') {
         isFollowed = !!result.data;
+      } else if (key === 'userRole') {
+        userRole = (result.data as { role?: string } | null)?.role;
       } else if (key === 'confirmations') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const confirmations = result.data as any[];
@@ -130,6 +142,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
       }
     });
   }
+
+  isCreatorOrAdmin = (user?.id === typedReport.user_id) || (userRole === 'admin');
 
   // Check resolution timeout (must run after confirmations data is available)
   if (typedReport.status === 'resolved' && typedReport.resolved_at) {

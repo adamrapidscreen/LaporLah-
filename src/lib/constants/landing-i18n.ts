@@ -28,7 +28,7 @@ export const LANG = {
     feature_1_title: "Snap & Report in Seconds",
     feature_1_desc: "Take a photo, drop a pin, and your report goes live instantly. Share directly from your camera roll. LaporLah appears in your phone's share sheet.",
     feature_2_title: "Real-Time Status Tracking",
-    feature_2_desc: "Watch your report progress from Open → Acknowledged → In Progress → Resolved. Get notified at every step.",
+    feature_2_desc: "Watch your report progress from Open → In Progress → Resolved. Get notified at every step.",
     feature_3_title: "Community Verification",
     feature_3_desc: "When someone marks an issue as resolved, the community votes to confirm. No more premature closures. Trust the people who live there.",
     feature_4_title: "Gamification & Badges",

@@ -4,7 +4,6 @@ import { getStatusBreakdown } from '@/lib/actions/admin';
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-blue-500',
-  acknowledged: 'bg-amber-500',
   in_progress: 'bg-orange-500',
   resolved: 'bg-purple-500',
   closed: 'bg-emerald-500',

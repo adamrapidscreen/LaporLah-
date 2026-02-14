@@ -72,7 +72,6 @@
 
   /* Status Colors */
   --status-open: oklch(0.70 0.15 250);
-  --status-acknowledged: oklch(0.72 0.16 300);
   --status-in-progress: oklch(0.78 0.16 75);
   --status-resolved: oklch(0.75 0.18 165);
   --status-closed: oklch(0.55 0.015 260);
@@ -245,24 +244,23 @@
 
 /* ===== Premium 3D Card System ===== */
 
-/* Layered shadow for elevated cards — creates realistic depth */
+/* Layered shadow for elevated cards — light default: soft depth */
 .card-elevated {
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 4px 8px rgba(0, 0, 0, 0.2),
-    0 12px 24px rgba(0, 0, 0, 0.15),
-    0 24px 48px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 12px 24px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Subtle inner highlight — simulates light hitting the top edge */
+/* Subtle inner highlight — light-mode default: soft depth */
 .card-inner-glow {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 4px 8px rgba(0, 0, 0, 0.2),
-    0 12px 24px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 /* Hover lift effect — card rises on hover */
@@ -271,6 +269,22 @@
 }
 .card-lift:hover {
   transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    0 8px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode: strong depth for card-inner-glow and card-lift */
+:is(.dark .card-inner-glow) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+:is(.dark .card-lift:hover) {
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 8px 16px rgba(0, 0, 0, 0.2),
@@ -297,8 +311,16 @@
     0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* Subtle gradient overlay for cards — adds dimension */
+/* Subtle gradient overlay for cards — light default */
 .card-gradient-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.02) 100%
+  );
+}
+:is(.dark .card-gradient-overlay) {
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.03) 0%,
@@ -320,22 +342,12 @@
   text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
-/* Light mode overrides */
-@media (prefers-color-scheme: light) {
-  .card-elevated {
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.06),
-      0 4px 8px rgba(0, 0, 0, 0.04),
-      0 12px 24px rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-  }
-}
-
-/* Also support Tailwind dark: class strategy */
+/* Dark mode: strong depth for card-elevated */
 :is(.dark .card-elevated) {
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.3),
     0 4px 8px rgba(0, 0, 0, 0.2),
     0 12px 24px rgba(0, 0, 0, 0.15),
     0 24px 48px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }

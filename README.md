@@ -54,7 +54,7 @@
 
 4. **Set up Supabase**
    - Create a new project at [supabase.com](https://supabase.com)
-   - Enable Google OAuth in Authentication → Providers
+   - Enable **Google OAuth** and **Email** in Authentication → Providers. For instant sign-up without a confirmation email, disable **Confirm email** in the Email provider settings.
    - Create a Storage bucket named `report-photos`
    - Run the database migrations from `supabase/migrations/` in the SQL Editor (in order). **Migration 006** (`006_align_badge_thresholds.sql`) is required for badge unlock (Spotter at 1 report, return value for unlock modal).
    - Set up Row Level Security (RLS) policies
@@ -66,7 +66,13 @@
    ```
    This creates sample reports, users, and badges for testing.
 
-6. **Start the development server**
+6. **Test account (for testers)**  
+   The seed script creates a test admin account you can use to sign in with email/password (no Google required):
+   - **Email:** `tester@laporlah.my`
+   - **Password:** `LaporLah-Test123!`  
+   Use **Sign in with email** on the login page. This account has full access including the admin dashboard. For testing only; do not use in production.
+
+7. **Start the development server**
    ```bash
    npm run dev
    ```
@@ -163,7 +169,7 @@ laporlah/
 
 - **Designed for Malaysian context** — Categories and locations are Malaysia-specific
 - **Mobile-first PWA** — Optimized for mobile, functional on desktop
-- **Google OAuth only** — No email/password authentication
+- **Google OAuth and email/password** — Email sign-in available (test account for testers; see README)
 - **No push notifications** — In-app bell notification only
 - **No offline write/creation** — Can view cached content offline, but cannot create reports
 - **Location permission mandatory** — Required for report creation

@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 
 import { RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 
+const notAvailableToast = () =>
+  toast.info('Semak kemaskini hanya tersedia dalam versi dipasang (PWA) atau production.', {
+    description: 'Update check is only available when the app is installed as PWA or in production.',
+  });
+
 export function UpdateChecker() {
-  const [isPending, startTransition] = useTransition();
   const [isChecking, setIsChecking] = useState(false);
 
   const checkForUpdates = async () => {
@@ -22,35 +26,35 @@ export function UpdateChecker() {
         return;
       }
 
-      let registration = await navigator.serviceWorker.getRegistration();
-      if (!registration) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        if (registrations.length > 0) registration = registrations[0];
-      }
-      if (!registration) {
-        try {
-          registration = await navigator.serviceWorker.register('/sw.js');
-        } catch {
-          // e.g. 404 in dev or not production
-        }
+      if (process.env.NODE_ENV !== 'production') {
+        notAvailableToast();
+        return;
       }
 
-      if (registration) {
-        await registration.update();
-        if (registration.waiting) {
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-          toast.success('Kemaskini ditemui!', {
-            description: 'Aplikasi akan dimuat semula / App will reload',
-          });
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          toast.success('Anda sudah menggunakan versi terkini', {
-            description: "You're on the latest version",
-          });
-        }
+      let registration: ServiceWorkerRegistration | undefined;
+      try {
+        registration = await navigator.serviceWorker.register('/sw.js');
+      } catch {
+        registration =
+          (await navigator.serviceWorker.getRegistration()) ??
+          (await navigator.serviceWorker.getRegistrations())[0];
+      }
+
+      if (!registration) {
+        notAvailableToast();
+        return;
+      }
+
+      await registration.update();
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        toast.success('Kemaskini ditemui!', {
+          description: 'Aplikasi akan dimuat semula / App will reload',
+        });
+        setTimeout(() => window.location.reload(), 1000);
       } else {
-        toast.info('Semak kemaskini hanya tersedia dalam versi dipasang (PWA) atau production.', {
-          description: 'Update check is only available when the app is installed as PWA or in production.',
+        toast.success('Anda sudah menggunakan versi terkini', {
+          description: "You're on the latest version",
         });
       }
     } catch (error) {
@@ -69,10 +73,10 @@ export function UpdateChecker() {
       <Button
         variant="secondary"
         className="w-full min-h-[44px]"
-        onClick={() => startTransition(() => { void checkForUpdates(); })}
-        disabled={isPending || isChecking}
+        onClick={() => void checkForUpdates()}
+        disabled={isChecking}
       >
-        <RefreshCw className={`h-4 w-4 mr-2 ${(isPending || isChecking) ? 'animate-spin' : ''}`} />
+        <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
         Semak Kemaskini
       </Button>
     </div>

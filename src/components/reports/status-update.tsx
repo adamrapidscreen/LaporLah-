@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { updateReportStatus } from '@/lib/actions/reports';
@@ -24,7 +25,7 @@ export function StatusUpdate({
 
   function getNextStatus(): ReportStatus | null {
     // Creator/admin can advance forward (up to in_progress)
-    if (isCreatorOrAdmin && currentIndex < 3) {
+    if (isCreatorOrAdmin && currentIndex < 2) {
       return STATUS_FLOW[currentIndex + 1];
     }
     // Any auth user can propose resolved when in_progress
@@ -43,8 +44,7 @@ export function StatusUpdate({
     startTransition(async () => {
       const result = await updateReportStatus(reportId, statusToUpdate);
       if (result?.error) {
-        // TODO: show error toast
-        console.error(result.error);
+        toast.error(result.error);
       }
     });
   }

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { ArrowLeft } from 'lucide-react';
+
 import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +24,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen bg-background">
       <div className="border-b">
         <div className="container mx-auto px-4 py-4">
+          <Link
+            href="/settings"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Settings
+          </Link>
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         </div>
         <nav className="container mx-auto px-4">

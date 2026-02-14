@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 import { createClient } from '@/lib/supabase/server';
+import { uuidLike } from '@/lib/validations/ids';
 
-const idSchema = z.string().uuid();
+const idSchema = uuidLike;
 
 interface RequireAdminResult {
   error: string | null;
@@ -137,7 +138,6 @@ export async function unbanUser(userId: string) {
 export interface AdminStats {
   totalReports: number;
   open: number;
-  acknowledged: number;
   inProgress: number;
   resolved: number;
   closed: number;
@@ -152,7 +152,6 @@ export async function getAdminStats(): Promise<AdminStats> {
   const [
     totalReportsResult,
     openResult,
-    acknowledgedResult,
     inProgressResult,
     resolvedResult,
     closedResult,
@@ -160,7 +159,6 @@ export async function getAdminStats(): Promise<AdminStats> {
   ] = await Promise.all([
     supabase.from('reports').select('*', { count: 'exact', head: true }),
     supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-    supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'acknowledged'),
     supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'in_progress'),
     supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'resolved'),
     supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'closed'),
@@ -170,7 +168,6 @@ export async function getAdminStats(): Promise<AdminStats> {
   return {
     totalReports: totalReportsResult.count ?? 0,
     open: openResult.count ?? 0,
-    acknowledged: acknowledgedResult.count ?? 0,
     inProgress: inProgressResult.count ?? 0,
     resolved: resolvedResult.count ?? 0,
     closed: closedResult.count ?? 0,

@@ -8,6 +8,7 @@ import { awardPoints, checkAndAwardBadges, updateStreak } from '@/lib/actions/ga
 import { STATUS_FLOW, statusConfig, type ReportStatus } from '@/lib/constants/statuses';
 import { createClient } from '@/lib/supabase/server';
 import type { ActionState } from '@/lib/types';
+import { uuidLike } from '@/lib/validations/ids';
 
 const createReportSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
@@ -111,8 +112,8 @@ export async function createReport(
 }
 
 const updateStatusSchema = z.object({
-  reportId: z.string().uuid(),
-  newStatus: z.enum(['acknowledged', 'in_progress', 'resolved', 'closed']),
+  reportId: uuidLike,
+  newStatus: z.enum(['in_progress', 'resolved', 'closed']),
 });
 
 export async function updateReportStatus(reportId: string, newStatus: ReportStatus) {
@@ -123,11 +124,11 @@ export async function updateReportStatus(reportId: string, newStatus: ReportStat
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  // Check if user is banned
+  // Check if user is banned and get role for admin status updates
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await (supabase as any)
     .from('users')
-    .select('is_banned')
+    .select('is_banned, role')
     .eq('id', user.id)
     .single();
 
@@ -150,7 +151,7 @@ export async function updateReportStatus(reportId: string, newStatus: ReportStat
   const newIndex = STATUS_FLOW.indexOf(newStatus);
 
   // Authorization: creator/admin for forward, any auth for resolved
-  const isCreatorOrAdmin = report.user_id === user.id; // TODO: add admin check
+  const isCreatorOrAdmin = report.user_id === user.id || (profile as { role?: string } | null)?.role === 'admin';
   if (newStatus !== 'resolved' && !isCreatorOrAdmin) {
     return { error: 'Not authorized' };
   }

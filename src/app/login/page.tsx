@@ -2,12 +2,26 @@
 
 import { useState } from 'react';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
+import { syncUserAfterSignIn } from '@/lib/actions/auth';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') ?? '/feed';
+
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [loading, setLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const supabase = createClient();
 
   const handleGoogleSignIn = async () => {
@@ -16,16 +30,72 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       });
       if (error) {
-        console.error('Auth error:', error.message);
+        toast.error('Sign-in failed', { description: error.message });
       }
     } finally {
       setLoading(false);
     }
   };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) {
+      toast.error('Please enter email and password');
+      return;
+    }
+    setEmailLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) {
+        toast.error('Sign-in failed', { description: error.message });
+        return;
+      }
+      const { error: syncError } = await syncUserAfterSignIn();
+      if (syncError) {
+        toast.error('Sign-in succeeded but profile sync failed', { description: syncError });
+      }
+      router.push(next);
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) {
+      toast.error('Please enter email and password');
+      return;
+    }
+    setEmailLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: { data: { full_name: fullName.trim() || undefined } },
+      });
+      if (error) {
+        toast.error('Sign-up failed', { description: error.message });
+        return;
+      }
+      if (data.session) {
+        const { error: syncError } = await syncUserAfterSignIn();
+        if (syncError) {
+          toast.error('Account created but profile sync failed', { description: syncError });
+        }
+        router.push(next);
+      } else {
+        toast.success('Check your email to confirm your account');
+      }
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleEmailSubmit = mode === 'signup' ? handleEmailSignUp : handleEmailSignIn;
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -41,7 +111,7 @@ export default function LoginPage() {
         <CardContent className="space-y-4">
           <Button
             onClick={handleGoogleSignIn}
-            disabled={loading}
+            disabled={loading || emailLoading}
             className="w-full gap-2"
             size="lg"
           >
@@ -66,6 +136,67 @@ export default function LoginPage() {
             </svg>
             {loading ? 'Signing in...' : 'Sign in with Google'}
           </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleEmailSubmit} className="space-y-3">
+            {mode === 'signup' && (
+              <Input
+                type="text"
+                placeholder="Full name (optional)"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                autoComplete="name"
+                disabled={loading || emailLoading}
+              />
+            )}
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              disabled={loading || emailLoading}
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              disabled={loading || emailLoading}
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              className="w-full"
+              size="lg"
+              disabled={loading || emailLoading}
+            >
+              {emailLoading
+                ? mode === 'signup'
+                  ? 'Creating account...'
+                  : 'Signing in...'
+                : mode === 'signup'
+                  ? 'Create account'
+                  : 'Sign in with email'}
+            </Button>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => setMode((m) => (m === 'signin' ? 'signup' : 'signin'))}
+            className="text-center text-xs text-muted-foreground underline hover:text-foreground w-full"
+          >
+            {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+          </button>
 
           <p className="text-center text-xs text-muted-foreground">
             Report issues, track progress, build a better community.
