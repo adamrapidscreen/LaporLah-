@@ -1,12 +1,14 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { Calendar } from 'lucide-react';
+import { Calendar, ShieldCheck } from 'lucide-react';
 
 import { DisplayNameEditor } from '@/components/settings/display-name-editor';
 import { SignOutButton } from '@/components/settings/sign-out-button';
 import { ThemeSelector } from '@/components/settings/theme-selector';
 import { UpdateChecker } from '@/components/settings/update-checker';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/types/database';
 
@@ -85,6 +87,21 @@ export default async function SettingsPage() {
           <UpdateChecker />
         </div>
       </section>
+
+      {/* Admin (admin users only) */}
+      {typedUser.role === 'admin' && (
+        <section className="space-y-3">
+          <h2 className="text-base font-semibold">Admin</h2>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <Button asChild variant="secondary" className="w-full min-h-[44px] gap-2">
+              <Link href="/admin">
+                <ShieldCheck className="h-4 w-4" />
+                Admin Dashboard
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* Sign Out */}
       <section className="pt-4">

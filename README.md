@@ -58,6 +58,7 @@
    - Create a Storage bucket named `report-photos`
    - Run the database migrations from `supabase/migrations/` in the SQL Editor (in order). **Migration 006** (`006_align_badge_thresholds.sql`) is required for badge unlock (Spotter at 1 report, return value for unlock modal).
    - Set up Row Level Security (RLS) policies
+   - **Google OAuth:** To show "LaporLah" on the Google sign-in screen (instead of a Supabase URL), set the OAuth consent screen **Application name** to **LaporLah** in [Google Cloud Console](https://console.cloud.google.com) → APIs & Services → OAuth consent screen.
 
 5. **Seed the database**
    ```bash

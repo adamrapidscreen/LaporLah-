@@ -143,7 +143,7 @@ export default function LandingPage() {
                 BM
               </span>
             </button>
-            <Button asChild size="sm" className="hidden sm:flex">
+            <Button asChild size="sm">
               <Link href="/login">{t.nav_cta}</Link>
             </Button>
           </div>

@@ -13,39 +13,40 @@ export function UpdateChecker() {
 
   const checkForUpdates = async () => {
     setIsChecking(true);
-    
+
     try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration();
-        
-        if (registration) {
-          await registration.update();
-          
-          if (registration.waiting) {
-            // New service worker is waiting
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            
-            toast.success('Kemaskini ditemui!', {
-              description: 'Aplikasi akan dimuat semula / App will reload',
-            });
-            
-            // Wait a moment then reload
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
-          } else {
-            toast.success('Anda sudah menggunakan versi terkini', {
-              description: 'You\'re on the latest version',
-            });
-          }
+      if (!('serviceWorker' in navigator)) {
+        toast.info('PWA tidak disokong', {
+          description: 'Service workers not supported',
+        });
+        return;
+      }
+
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        try {
+          registration = await navigator.serviceWorker.register('/sw.js');
+        } catch {
+          // e.g. 404 in dev or not production
+        }
+      }
+
+      if (registration) {
+        await registration.update();
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          toast.success('Kemaskini ditemui!', {
+            description: 'Aplikasi akan dimuat semula / App will reload',
+          });
+          setTimeout(() => window.location.reload(), 1000);
         } else {
-          toast.info('Semak kemaskini hanya tersedia dalam versi dipasang (PWA) atau production.', {
-            description: 'Update check is only available when the app is installed as PWA or in production.',
+          toast.success('Anda sudah menggunakan versi terkini', {
+            description: "You're on the latest version",
           });
         }
       } else {
-        toast.info('PWA tidak disokong', {
-          description: 'Service workers not supported',
+        toast.info('Semak kemaskini hanya tersedia dalam versi dipasang (PWA) atau production.', {
+          description: 'Update check is only available when the app is installed as PWA or in production.',
         });
       }
     } catch (error) {
