@@ -105,6 +105,7 @@ export async function createReport(
   }
 
   revalidatePath('/');
+  revalidatePath('/profile');
   // Redirect happens client-side after toast, so return reportId
   return { newBadges, reportId: report.id };
 }

@@ -56,7 +56,7 @@
    - Create a new project at [supabase.com](https://supabase.com)
    - Enable Google OAuth in Authentication → Providers
    - Create a Storage bucket named `report-photos`
-   - Run the database migrations from `supabase/migrations/` in the SQL Editor
+   - Run the database migrations from `supabase/migrations/` in the SQL Editor (in order). **Migration 006** (`006_align_badge_thresholds.sql`) is required for badge unlock (Spotter at 1 report, return value for unlock modal).
    - Set up Row Level Security (RLS) policies
 
 5. **Seed the database**

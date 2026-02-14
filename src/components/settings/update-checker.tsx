@@ -39,8 +39,8 @@ export function UpdateChecker() {
             });
           }
         } else {
-          toast.info('Service worker tidak dijumpai', {
-            description: 'Service worker not found',
+          toast.info('Semak kemaskini hanya tersedia dalam versi dipasang (PWA) atau production.', {
+            description: 'Update check is only available when the app is installed as PWA or in production.',
           });
         }
       } else {
