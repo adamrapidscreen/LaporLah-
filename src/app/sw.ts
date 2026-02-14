@@ -1,4 +1,4 @@
-import { Serwist } from 'serwist';
+import { CacheFirst, ExpirationPlugin, NetworkFirst, Serwist } from 'serwist';
 
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
 
@@ -17,42 +17,44 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     {
-      urlPattern: ({ request }: { request: Request }) => request.destination === 'image',
-      handler: 'CacheFirst',
-      options: {
+      matcher: ({ request }) => request.destination === 'image',
+      handler: new CacheFirst({
         cacheName: 'images',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60,
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ request }: { request: Request }) => request.destination === 'font',
-      handler: 'CacheFirst',
-      options: {
+      matcher: ({ request }) => request.destination === 'font',
+      handler: new CacheFirst({
         cacheName: 'fonts',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 365 * 24 * 60 * 60,
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 50,
+            maxAgeSeconds: 365 * 24 * 60 * 60,
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ request }: { request: Request }) => request.url.includes('/api/'),
-      handler: 'NetworkFirst',
-      options: {
+      matcher: ({ request }) => request.url.includes('/api/'),
+      handler: new NetworkFirst({
         cacheName: 'api',
         networkTimeoutSeconds: 10,
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 5 * 60,
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 50,
+            maxAgeSeconds: 5 * 60,
+          }),
+        ],
+      }),
     },
   ],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any);
+});
 
 // Handle share target POST requests
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
