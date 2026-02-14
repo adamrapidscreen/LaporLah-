@@ -90,9 +90,19 @@ export async function createReport(
   });
 
   // Gamification actions
+  console.log('[Report Create] Awarding points to user:', user.id);
   await awardPoints(user.id, 'create_report', report.id);
   await updateStreak(user.id);
-  const { badges: newBadges } = await checkAndAwardBadges(user.id);
+
+  console.log('[Report Create] Checking for badges...');
+  const badgeResult = await checkAndAwardBadges(user.id);
+  const { badges: newBadges } = badgeResult;
+
+  if ('error' in badgeResult) {
+    console.error('[Report Create] Badge check failed:', badgeResult.error);
+  } else {
+    console.log('[Report Create] Badge check result:', JSON.stringify(newBadges, null, 2));
+  }
 
   revalidatePath('/');
   // Redirect happens client-side after toast, so return reportId

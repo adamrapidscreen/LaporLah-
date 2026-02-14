@@ -7,17 +7,29 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 
 const addCommentSchema = z.object({
-  reportId: z.string().uuid(),
+  reportId: z.string().refine((val) => {
+    // More permissive UUID validation - check if it looks like a UUID
+    // Accepts standard UUID format and seed data format like a0000000-0000-0000-0000-000000000001
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(val);
+  }, { message: 'Invalid report ID' }),
   content: z.string().min(1, 'Comment cannot be empty').max(1000, 'Comment too long'),
 });
 
 export async function addComment(reportId: string, content: string) {
   // 1. Validate input
+  console.log('[Comment] Received reportId:', reportId, 'Type:', typeof reportId);
+  console.log('[Comment] Content length:', content?.length);
+
   const parsed = addCommentSchema.safeParse({ reportId, content });
   if (!parsed.success) {
     const firstError = parsed.error.issues[0];
+    console.error('[Comment] Validation failed:', firstError);
+    console.error('[Comment] All validation errors:', JSON.stringify(parsed.error.issues, null, 2));
     return { error: firstError?.message || 'Validation failed' };
   }
+
+  console.log('[Comment] Validation passed, proceeding...');
 
   const supabase = await createClient();
 

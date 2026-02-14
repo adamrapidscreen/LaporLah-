@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import NextTopLoader from 'nextjs-toploader';
 
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 import { NavWrapper } from '@/components/layout/nav-wrapper';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -42,12 +43,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <NextTopLoader 
+        <NextTopLoader
           color="hsl(var(--primary))"
           showSpinner={false}
           height={3}
         />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+          <ServiceWorkerRegistration />
           <NavWrapper />
           <main className="min-h-screen overflow-x-hidden pb-20 md:pb-0">
             {children}

@@ -15,6 +15,18 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
+      // Check if user already exists in database
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('full_name')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      // Preserve existing display name, only use metadata for new users or if name is empty
+      const fullName = existingUser?.full_name
+        ? existingUser.full_name
+        : (data.user.user_metadata.full_name ?? data.user.email!);
+
       // Upsert user in public.users table
       const { error: upsertError } = await supabase
         .from('users')
@@ -22,8 +34,7 @@ export async function GET(request: Request) {
           {
             id: data.user.id,
             email: data.user.email!,
-            full_name:
-              data.user.user_metadata.full_name ?? data.user.email!,
+            full_name: fullName,
             avatar_url: data.user.user_metadata.avatar_url ?? null,
           },
           { onConflict: 'id' }
