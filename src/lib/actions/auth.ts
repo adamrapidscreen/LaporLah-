@@ -14,7 +14,8 @@ export async function syncUserAfterSignIn(): Promise<{ error: string | null }> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) return { error: 'Not authenticated' };
 
-  const { data: existingUser } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existingUser } = await (supabase as any)
     .from('users')
     .select('full_name')
     .eq('id', user.id)
@@ -23,7 +24,8 @@ export async function syncUserAfterSignIn(): Promise<{ error: string | null }> {
   const fullName =
     existingUser?.full_name ?? (user.user_metadata?.full_name as string | undefined) ?? user.email;
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('users')
     .upsert(
       {
