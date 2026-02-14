@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+const PROMPT_DELAY_MS = 1500;
+
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const showPromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Check if app is already installed
@@ -24,24 +27,26 @@ export function usePWAInstall() {
       return;
     }
 
-    // Listen for beforeinstallprompt event
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
 
-      // Auto-show prompt after a delay
-      const timer = setTimeout(() => {
+      if (showPromptTimerRef.current) clearTimeout(showPromptTimerRef.current);
+      showPromptTimerRef.current = setTimeout(() => {
         setShowPrompt(true);
-      }, 3000); // Show after 3 seconds
-
-      return () => clearTimeout(timer);
+        showPromptTimerRef.current = null;
+      }, PROMPT_DELAY_MS);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
+      if (showPromptTimerRef.current) {
+        clearTimeout(showPromptTimerRef.current);
+        showPromptTimerRef.current = null;
+      }
     };
   }, []);
 

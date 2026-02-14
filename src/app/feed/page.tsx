@@ -6,7 +6,6 @@ import { CommunityPulse } from '@/components/reports/community-pulse';
 import { ReportCard } from '@/components/reports/report-card';
 import { ReportFeed } from '@/components/reports/report-feed';
 import { EmptyState } from '@/components/shared/empty-state';
-import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { getCommunityStats } from '@/lib/actions/reports';
 import { createClient } from '@/lib/supabase/server';
 import type { Report } from '@/lib/types';
@@ -88,7 +87,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           ))}
         </div>
       )}
-      <PWAInstallPrompt />
     </div>
   );
 }

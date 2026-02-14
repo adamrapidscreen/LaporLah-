@@ -3,8 +3,9 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import NextTopLoader from 'nextjs-toploader';
 
-import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 import { NavWrapper } from '@/components/layout/nav-wrapper';
+import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 import { Toaster } from '@/components/ui/sonner';
 
 import type { Metadata, Viewport } from 'next';
@@ -51,6 +52,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ServiceWorkerRegistration />
           <NavWrapper />
+          <PWAInstallPrompt />
           <main className="min-h-screen overflow-x-hidden pb-20 md:pb-0">
             {children}
           </main>

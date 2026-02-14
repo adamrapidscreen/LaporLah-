@@ -24,6 +24,10 @@ export function UpdateChecker() {
 
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        if (registrations.length > 0) registration = registrations[0];
+      }
+      if (!registration) {
         try {
           registration = await navigator.serviceWorker.register('/sw.js');
         } catch {
