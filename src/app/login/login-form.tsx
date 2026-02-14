@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -23,6 +23,17 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const supabase = createClient();
+  const authErrorShown = useRef(false);
+
+  useEffect(() => {
+    if (authErrorShown.current) return;
+    if (searchParams.get('error') === 'auth') {
+      authErrorShown.current = true;
+      toast.error('Sign-in failed', {
+        description: 'Please try again or sign in with email.',
+      });
+    }
+  }, [searchParams]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
