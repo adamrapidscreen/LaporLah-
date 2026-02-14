@@ -78,52 +78,65 @@ export default async function ProfilePage() {
     closer: closerCount ?? 0,
   };
 
+  const noiseSvg = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`;
+
   return (
-    <div className="space-y-6 p-4 max-w-lg mx-auto pb-24">
-      <CivicCard
-        user={{
-          full_name: typedUser.full_name,
-          avatar_url: typedUser.avatar_url,
-          created_at: typedUser.created_at,
-          total_points: typedUser.total_points,
-          current_streak: typedUser.current_streak,
-        }}
-        stats={{
-          points: typedUser.total_points,
-          reportsCount: reportsCount ?? 0,
-          commentsCount: commentsCount ?? 0,
-        }}
+    <div className="relative min-h-screen">
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.015]"
+        style={{ backgroundImage: noiseSvg, backgroundRepeat: 'repeat' }}
       />
+      <div className="relative z-10 space-y-6 p-4 max-w-lg mx-auto pb-24">
+        <CivicCard
+          user={{
+            full_name: typedUser.full_name,
+            avatar_url: typedUser.avatar_url,
+            created_at: typedUser.created_at,
+            total_points: typedUser.total_points,
+            current_streak: typedUser.current_streak,
+          }}
+          stats={{
+            points: typedUser.total_points,
+            reportsCount: reportsCount ?? 0,
+            commentsCount: commentsCount ?? 0,
+          }}
+        />
 
-      {/* Badges Section */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Badges</h2>
-        <div className="grid gap-3">
-          {(Object.keys(BADGE_DEFINITIONS) as BadgeType[]).map((badgeType) => {
-            // Find earned badges for this type and get highest tier
-            const earnedBadges = badges?.filter(b => b.type === badgeType) ?? [];
-            const tierOrder: BadgeTier[] = ['gold', 'silver', 'bronze'];
-            const highestTier = tierOrder.find(t => earnedBadges.some(b => b.tier === t));
-            const isEarned = !!highestTier;
+        {/* Badges Section */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-3 mt-8 mb-4 px-4">
+            <h2 className="text-lg font-semibold text-foreground">Badges</h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+          </div>
+          <div className="grid gap-3">
+            {(Object.keys(BADGE_DEFINITIONS) as BadgeType[]).map((badgeType) => {
+              const earnedBadges = badges?.filter(b => b.type === badgeType) ?? [];
+              const tierOrder: BadgeTier[] = ['gold', 'silver', 'bronze'];
+              const highestTier = tierOrder.find(t => earnedBadges.some(b => b.tier === t));
+              const isEarned = !!highestTier;
 
-            return (
-              <BadgeCard
-                key={badgeType}
-                badgeType={badgeType}
-                tier={highestTier ?? 'bronze'}
-                currentCount={badgeCounts[badgeType]}
-                earned={isEarned}
-              />
-            );
-          })}
-        </div>
-      </section>
+              return (
+                <BadgeCard
+                  key={badgeType}
+                  badgeType={badgeType}
+                  tier={highestTier ?? 'bronze'}
+                  currentCount={badgeCounts[badgeType]}
+                  earned={isEarned}
+                />
+              );
+            })}
+          </div>
+        </section>
 
-      {/* Activity Feed */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Recent Activity</h2>
-        <ActivityFeed activities={activities ?? []} />
-      </section>
+        {/* Activity Feed */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-3 mt-8 mb-4 px-4">
+            <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+          </div>
+          <ActivityFeed activities={activities ?? []} />
+        </section>
+      </div>
     </div>
   );
 }

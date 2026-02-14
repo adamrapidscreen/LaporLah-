@@ -35,8 +35,9 @@ export async function GreetingHeader({ displayName: propDisplayName }: GreetingH
 
   return (
     <div className="px-4 pt-6 pb-4">
-      <div className="rounded-2xl border border-border/60 bg-gradient-to-r from-primary/15 via-primary/5 to-background/80 px-4 py-3 sm:px-5 sm:py-4 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative overflow-hidden rounded-2xl card-inner-glow card-lift border border-border/60 bg-gradient-to-r from-primary/15 via-primary/5 to-background/80">
+        <div className="absolute inset-0 card-gradient-overlay pointer-events-none" />
+        <div className="relative z-10 flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
           <div>
             <ClientGreeting userName={displayName ?? null} />
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">

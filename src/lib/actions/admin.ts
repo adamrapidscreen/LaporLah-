@@ -303,3 +303,234 @@ export async function getFlaggedItems(): Promise<FlaggedItem[]> {
 
   return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
+
+// --- Dashboard analytics (non-hidden reports only) ---
+
+export interface DashboardStats {
+  totalReports: number;
+  openCount: number;
+  resolvedCount: number;
+  usersCount: number;
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const { error: authError, supabase } = await requireAdmin();
+  if (authError || !supabase) throw new Error(authError ?? 'Unauthorized');
+
+  const [
+    totalResult,
+    openResult,
+    resolvedResult,
+    usersResult,
+  ] = await Promise.all([
+    supabase.from('reports').select('id', { count: 'exact', head: true }).eq('is_hidden', false),
+    supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open').eq('is_hidden', false),
+    supabase.from('reports').select('id', { count: 'exact', head: true }).in('status', ['resolved', 'closed']).eq('is_hidden', false),
+    supabase.from('users').select('id', { count: 'exact', head: true }),
+  ]);
+
+  return {
+    totalReports: totalResult.count ?? 0,
+    openCount: openResult.count ?? 0,
+    resolvedCount: resolvedResult.count ?? 0,
+    usersCount: usersResult.count ?? 0,
+  };
+}
+
+export async function getCategoryCounts(): Promise<Record<string, number>> {
+  const { error: authError, supabase } = await requireAdmin();
+  if (authError || !supabase) throw new Error(authError ?? 'Unauthorized');
+
+  const { data } = await supabase
+    .from('reports')
+    .select('category')
+    .eq('is_hidden', false);
+
+  const rows = (data ?? []) as { category: string }[];
+  const categoryCounts = rows.reduce((acc, r) => {
+    acc[r.category] = (acc[r.category] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return categoryCounts;
+}
+
+export async function getStatusBreakdown(): Promise<Record<string, number>> {
+  const { error: authError, supabase } = await requireAdmin();
+  if (authError || !supabase) throw new Error(authError ?? 'Unauthorized');
+
+  const { data } = await supabase
+    .from('reports')
+    .select('status')
+    .eq('is_hidden', false);
+
+  const rows = (data ?? []) as { status: string }[];
+  const statusCounts = rows.reduce((acc, r) => {
+    acc[r.status] = (acc[r.status] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return statusCounts;
+}
+
+export interface TopContributor {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  total_points: number;
+  role: string;
+  reportCount: number;
+}
+
+export async function getTopContributors(): Promise<TopContributor[]> {
+  const { error: authError, supabase } = await requireAdmin();
+  if (authError || !supabase) throw new Error(authError ?? 'Unauthorized');
+
+  const { data: topUsers } = await supabase
+    .from('users')
+    .select('id, full_name, avatar_url, total_points, role')
+    .order('total_points', { ascending: false })
+    .limit(5);
+
+  const { data: reportRows } = await supabase
+    .from('reports')
+    .select('user_id')
+    .eq('is_hidden', false);
+
+  const reportCountByUser = (reportRows ?? []).reduce((acc, r) => {
+    const uid = (r as { user_id: string }).user_id;
+    acc[uid] = (acc[uid] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (topUsers ?? []).map((u) => ({
+    id: (u as { id: string; full_name: string | null; avatar_url: string | null; total_points: number; role: string }).id,
+    full_name: (u as { full_name: string | null }).full_name,
+    avatar_url: (u as { avatar_url: string | null }).avatar_url,
+    total_points: (u as { total_points: number }).total_points,
+    role: (u as { role: string }).role,
+    reportCount: reportCountByUser[(u as { id: string }).id] ?? 0,
+  }));
+}
+
+export interface ActivityItem {
+  type: 'report' | 'comment' | 'follow' | 'flag' | 'confirmation';
+  icon: string;
+  description: string;
+  timestamp: string;
+}
+
+export async function getActivityFeed(): Promise<ActivityItem[]> {
+  const { error: authError, supabase } = await requireAdmin();
+  if (authError || !supabase) throw new Error(authError ?? 'Unauthorized');
+
+  const [
+    { data: recentReports },
+    { data: recentComments },
+    { data: recentFollows },
+    { data: recentFlags },
+    { data: recentConfirmations },
+  ] = await Promise.all([
+    supabase.from('reports')
+      .select('id, title, status, created_at, creator:users!user_id(full_name)')
+      .eq('is_hidden', false)
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase.from('comments')
+      .select('id, created_at, user:users(full_name), report:reports(title)')
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase.from('follows')
+      .select('id, created_at, user:users(full_name), report:reports(title)')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase.from('flags')
+      .select('id, created_at, user:users(full_name), report_id, report:reports(title)')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase.from('confirmations')
+      .select('id, vote, created_at, user:users(full_name), report:reports(title)')
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ]);
+
+  const items: { timestamp: string; item: ActivityItem }[] = [];
+
+  for (const r of recentReports ?? []) {
+    const row = r as { id: string; title: string; created_at: string; creator: { full_name: string | null } | null };
+    const name = row.creator?.full_name ?? 'Someone';
+    items.push({
+      timestamp: row.created_at,
+      item: {
+        type: 'report',
+        icon: '🔵',
+        description: `${name} created "${row.title}"`,
+        timestamp: row.created_at,
+      },
+    });
+  }
+
+  for (const c of recentComments ?? []) {
+    const row = c as { id: string; created_at: string; user: { full_name: string | null } | null; report: { title: string } | null };
+    const name = row.user?.full_name ?? 'Someone';
+    const title = row.report?.title ?? 'a report';
+    items.push({
+      timestamp: row.created_at,
+      item: {
+        type: 'comment',
+        icon: '💬',
+        description: `${name} commented on "${title}"`,
+        timestamp: row.created_at,
+      },
+    });
+  }
+
+  for (const f of recentFollows ?? []) {
+    const row = f as { id: string; created_at: string; user: { full_name: string | null } | null; report: { title: string } | null };
+    const name = row.user?.full_name ?? 'Someone';
+    const title = row.report?.title ?? 'a report';
+    items.push({
+      timestamp: row.created_at,
+      item: {
+        type: 'follow',
+        icon: '👁',
+        description: `${name} followed "${title}"`,
+        timestamp: row.created_at,
+      },
+    });
+  }
+
+  for (const fl of recentFlags ?? []) {
+    const row = fl as { id: string; created_at: string; user: { full_name: string | null } | null; report_id: string | null; report: { title: string } | null };
+    const name = row.user?.full_name ?? 'Someone';
+    const title = row.report?.title ?? (row.report_id ? 'a report' : 'an item');
+    items.push({
+      timestamp: row.created_at,
+      item: {
+        type: 'flag',
+        icon: '🚩',
+        description: `${name} flagged "${title}"`,
+        timestamp: row.created_at,
+      },
+    });
+  }
+
+  for (const co of recentConfirmations ?? []) {
+    const row = co as { id: string; vote: string; created_at: string; user: { full_name: string | null } | null; report: { title: string } | null };
+    const name = row.user?.full_name ?? 'Someone';
+    const title = row.report?.title ?? 'a report';
+    const voteText = row.vote === 'confirmed' ? 'confirmed' : 'not yet';
+    items.push({
+      timestamp: row.created_at,
+      item: {
+        type: 'confirmation',
+        icon: '🗳️',
+        description: `${name} voted ${voteText} on "${title}"`,
+        timestamp: row.created_at,
+      },
+    });
+  }
+
+  items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  return items.slice(0, 15).map((x) => x.item);
+}

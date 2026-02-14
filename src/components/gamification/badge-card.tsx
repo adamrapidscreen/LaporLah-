@@ -9,6 +9,30 @@ const BADGE_ICONS: Record<string, React.ElementType> = {
   'check-circle': CheckCircle,
 };
 
+const FLAIR_EN: Record<BadgeType, Record<BadgeTier, string>> = {
+  spotter: { bronze: 'New Spotter', silver: 'Experienced Spotter', gold: 'Top Spotter' },
+  kampung_hero: { bronze: 'Caring Neighbour', silver: 'Kampung Hero', gold: 'Kampung Legend' },
+  closer: { bronze: 'New Closer', silver: 'Skilled Closer', gold: 'Top Closer' },
+};
+
+const METRIC_UNLOCK: Record<BadgeType, string> = {
+  spotter: 'reports to unlock',
+  kampung_hero: 'comments to unlock',
+  closer: 'resolutions to unlock',
+};
+
+const TIER_GLOW = {
+  bronze: 'bg-orange-500/10 shadow-[0_0_15px_rgba(249,115,22,0.15)]',
+  silver: 'bg-slate-400/10 shadow-[0_0_15px_rgba(148,163,184,0.2)]',
+  gold: 'bg-yellow-500/10 shadow-[0_0_15px_rgba(234,179,8,0.2)]',
+} as const;
+
+const TIER_PILL = {
+  bronze: 'text-orange-400 bg-orange-500/10',
+  silver: 'text-slate-400 bg-slate-400/10',
+  gold: 'text-yellow-500/10 bg-yellow-500/10',
+} as const;
+
 interface BadgeCardProps {
   badgeType: BadgeType;
   tier: BadgeTier;
@@ -26,7 +50,7 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
     const progressPercent = Math.min((currentCount / bronzeThreshold) * 100, 100);
 
     return (
-      <div className="border-2 rounded-lg p-4 space-y-2 border-muted bg-muted/30 opacity-70">
+      <div className="rounded-xl card-inner-glow card-lift overflow-hidden border border-muted bg-muted/30 opacity-70 p-4 space-y-2">
         <div className="flex items-center gap-3">
           <div className="relative">
             <IconComponent className="h-8 w-8 grayscale" />
@@ -49,7 +73,7 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            {currentCount}/{bronzeThreshold} {badge.metric} untuk buka
+            {currentCount}/{bronzeThreshold} {METRIC_UNLOCK[badgeType]}
           </p>
         </div>
       </div>
@@ -58,7 +82,7 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
 
   // Earned state: existing logic
   const tierColor = TIER_COLORS[tier];
-  const flair = badge.flair[tier];
+  const flairEn = FLAIR_EN[badgeType][tier];
 
   // Calculate progress to next tier
   const tiers: BadgeTier[] = ['bronze', 'silver', 'gold'];
@@ -75,29 +99,33 @@ export function BadgeCard({ badgeType, tier, currentCount, earned = true }: Badg
     ? 100
     : Math.min((currentCount / nextThreshold) * 100, 100);
 
+  const borderByTier = { bronze: 'border border-orange-500/30', silver: 'border border-slate-400/30', gold: 'border border-yellow-500/30' } as const;
+
   return (
-    <div className={cn('border-2 rounded-lg p-4 space-y-2', tierColor.border, tierColor.bg)}>
+    <div className={cn('rounded-xl card-inner-glow card-lift overflow-hidden p-4 space-y-2 card-badge-glow', borderByTier[tier], tierColor.bg)}>
       <div className="flex items-center gap-3">
-        <IconComponent className="h-8 w-8" />
+        <div className={cn('w-12 h-12 rounded-full flex items-center justify-center', TIER_GLOW[tier])}>
+          <IconComponent className="h-8 w-8" />
+        </div>
         <div>
           <p className="font-semibold">{badge.name}</p>
-          <p className={cn('text-xs font-medium uppercase', tierColor.text)}>{tier}</p>
+          <p className={cn('text-[10px] font-bold uppercase tracking-widest rounded-full px-2 py-0.5', TIER_PILL[tier])}>{tier}</p>
         </div>
       </div>
 
-      <p className="text-sm italic text-muted-foreground">{flair}</p>
+      <p className="text-sm italic text-muted-foreground">{flairEn}</p>
 
       {/* Progress bar */}
       <div className="space-y-1">
-        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
+            className="h-full rounded-full bg-primary transition-all duration-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
         <p className="text-xs text-muted-foreground">
           {isMaxed
-            ? `${displayedCount} ${badge.metric}, Tahap tertinggi!`
+            ? `${displayedCount} ${badge.metric}, Highest tier!`
             : `${currentCount}/${nextThreshold} ${badge.metric}`}
         </p>
       </div>

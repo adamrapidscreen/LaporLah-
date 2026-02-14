@@ -16,7 +16,7 @@ function StatCard({ title, count, status, color }: StatCardProps) {
   return (
     <Link
       href={`/?status=${status}`}
-      className="bg-secondary/40 hover:bg-secondary/60 rounded-xl p-2 cursor-pointer transition flex flex-col items-center justify-center gap-0.5"
+      className="rounded-xl p-2 cursor-pointer flex flex-col items-center justify-center gap-0.5 bg-secondary/40 hover:bg-secondary/60 card-inner-glow card-lift overflow-hidden transition"
     >
       <div className="flex items-center gap-1.5">
         <div className={cn("w-2 h-2 rounded-full", color)} />

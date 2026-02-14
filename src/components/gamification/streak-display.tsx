@@ -16,8 +16,8 @@ export function StreakDisplay({ streak, className }: StreakDisplayProps) {
     : `${Math.floor(streak / 7)}-week streak`;
 
   return (
-    <span className={cn('text-sm font-medium text-accent', className)}>
-      <Flame className="inline h-4 w-4 mr-1" /> {label}
+    <span className={cn('inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 px-3 py-1 text-sm text-orange-400 backdrop-blur-sm', className)}>
+      <Flame className="h-4 w-4" /> {label}
     </span>
   );
 }

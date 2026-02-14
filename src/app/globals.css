@@ -242,3 +242,100 @@
 .animate-delay-150 { animation-delay: 150ms; }
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-450 { animation-delay: 450ms; }
+
+/* ===== Premium 3D Card System ===== */
+
+/* Layered shadow for elevated cards — creates realistic depth */
+.card-elevated {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 24px 48px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Subtle inner highlight — simulates light hitting the top edge */
+.card-inner-glow {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Hover lift effect — card rises on hover */
+.card-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    0 16px 32px rgba(0, 0, 0, 0.15),
+    0 32px 64px rgba(0, 0, 0, 0.1);
+}
+
+/* Primary glow ring — for the main profile card */
+.glow-primary {
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.1),
+    0 0 20px rgba(16, 185, 129, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Badge card glow on hover */
+.card-badge-glow:hover {
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.2),
+    0 0 15px rgba(249, 115, 22, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Subtle gradient overlay for cards — adds dimension */
+.card-gradient-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0.02) 100%
+  );
+}
+
+/* Avatar ring glow */
+.avatar-glow {
+  box-shadow:
+    0 0 0 3px rgba(16, 185, 129, 0.3),
+    0 0 15px rgba(16, 185, 129, 0.15),
+    0 0 30px rgba(16, 185, 129, 0.05);
+}
+
+/* Stat number shimmer — subtle text shadow for depth */
+.stat-number {
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Light mode overrides */
+@media (prefers-color-scheme: light) {
+  .card-elevated {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 8px rgba(0, 0, 0, 0.04),
+      0 12px 24px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Also support Tailwind dark: class strategy */
+:is(.dark .card-elevated) {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 24px 48px rgba(0, 0, 0, 0.1);
+}

@@ -8,6 +8,25 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const PROMPT_DELAY_MS = 1500;
+const PWA_PROMPT_DISMISSED_KEY = 'laporlah-pwa-prompt-dismissed';
+
+function getDismissed(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(PWA_PROMPT_DISMISSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function setDismissed(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(PWA_PROMPT_DISMISSED_KEY, '1');
+  } catch {
+    // ignore
+  }
+}
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -32,8 +51,11 @@ export function usePWAInstall() {
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
 
+      if (getDismissed()) return;
+
       if (showPromptTimerRef.current) clearTimeout(showPromptTimerRef.current);
       showPromptTimerRef.current = setTimeout(() => {
+        if (getDismissed()) return;
         setShowPrompt(true);
         showPromptTimerRef.current = null;
       }, PROMPT_DELAY_MS);
@@ -66,6 +88,7 @@ export function usePWAInstall() {
       } else {
         console.log('[PWA] User dismissed install prompt');
       }
+      setDismissed();
 
       setDeferredPrompt(null);
       setIsInstallable(false);
@@ -79,6 +102,7 @@ export function usePWAInstall() {
   }, [deferredPrompt]);
 
   const dismissPrompt = useCallback(() => {
+    setDismissed();
     setShowPrompt(false);
   }, []);
 

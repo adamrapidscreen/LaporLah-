@@ -100,7 +100,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ===== SECTION 1: Floating Nav Bar ===== */}
-      <nav className="sticky top-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/50">
+      <nav className="sticky top-0 z-[100] bg-background/60 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Logo href="/" size="md" />
@@ -131,6 +131,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <button
+              type="button"
               onClick={toggleLang}
               className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition"
             >
